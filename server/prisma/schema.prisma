@@ -1,0 +1,48 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model industries {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  industry_name String    @unique @db.VarChar(255)
+  createdat     DateTime? @default(now()) @db.Timestamp(6)
+  updatedat     DateTime? @default(now()) @db.Timestamp(6)
+  users         users[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id              String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username        String      @unique @db.VarChar(255)
+  first_name      String      @db.VarChar(255)
+  middle_name     String?     @db.VarChar(255)
+  last_name       String      @db.VarChar(255)
+  company_name    String?     @db.VarChar(255)
+  designation     String?     @db.VarChar(255)
+  email           String      @unique @db.VarChar(255)
+  contact_number  String?     @db.VarChar(20)
+  frp_industry_id String?     @db.Uuid
+  address         String?
+  refresh_token   String?     @unique
+  google_id       String?     @unique @db.VarChar(255)
+  linkedin_id     String?     @unique @db.VarChar(255)
+  is_verified     Boolean?    @default(false)
+  createdat       DateTime?   @default(now()) @db.Timestamp(6)
+  updatedat       DateTime?   @default(now()) @db.Timestamp(6)
+  deletedat       DateTime?   @db.Timestamp(6)
+  password        String?     @db.VarChar(255)
+  industries      industries? @relation(fields: [frp_industry_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model demo {
+  id   String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String?
+  age  Int?
+}
