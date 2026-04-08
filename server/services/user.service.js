@@ -7,8 +7,13 @@ class UserService {
         this.prisma = prisma;
     }
 
-    async create(data) {
-        
+    async create(data, isOAuth) {
+
+        if (isOAuth) {
+            return this.prisma.users.create({
+                data: { ...data, password: hashed }
+            });
+        }
         const hashed = await bcrypt.hash(data.password, 10);
         return this.prisma.users.create({
             data: { ...data, password: hashed }

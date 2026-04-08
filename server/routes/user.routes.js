@@ -1,7 +1,9 @@
 import Router from 'express'
 import {
     loginUser,
-    signupWithEmail
+    loginWithGoogle,
+    signupWithEmail,
+    signupWithGoogle
 } from '../controllers/user.controller.js'
 
 const router = Router()
@@ -13,5 +15,13 @@ router
 router
     .route('/auth/login')
     .post(loginUser)
+
+router
+    .route('/auth/signup/google')
+    .post(signupWithGoogle)
+
+router
+    .route('/auth/login/google')
+    .post(loginWithGoogle)
 
 export default router
