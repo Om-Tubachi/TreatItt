@@ -1,3 +1,4 @@
+/* eslint-disable import/first */
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import dotenv from 'dotenv'
@@ -14,7 +15,7 @@ app.use(cors({
 }))
 
 app.use(express.json())
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"))
 app.use(cookieParser())
 
@@ -29,6 +30,8 @@ app.use('/api/v1/users', userRouter)
 import industryRoutes from './routes/industries.routes.js'
 app.use('/api/v1/industries', industryRoutes)
 
+import wasteRoutes from './routes/waste.routes.js'
+app.use('/api/v1/wastes', wasteRoutes)
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}\thttp://localhost:${PORT}`)
