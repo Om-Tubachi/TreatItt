@@ -4,7 +4,7 @@ import {
     loginWithGoogle,
     signupWithEmail,
     signupWithGoogle
-} from '../controllers/user.controller.js'
+} from '../controllers/index.js'
 
 const router = Router()
 
