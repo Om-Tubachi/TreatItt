@@ -28,7 +28,7 @@
 ---
 
 # crud
-# 1. products
+# 1. products                                                   done
         POST   /products
         GET    /products
         GET    /products/:productId
@@ -39,7 +39,7 @@
         DELETE /products/:productId
         
 
-# 2. wastes
+# 2. wastes                                                      done
         POST   /wastes
         GET    /wastes
         GET    /wastes/:wasteId

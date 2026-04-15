@@ -16,14 +16,26 @@ import {
     uploadWaste
 } from '../controllers/wastes.controller.js'
 
+import {
+    createProduct,
+    deleteProduct,
+    getAllProducts,
+    getFilteredProducts,
+    getProductById,
+    getProductsByFrp,
+    getProductsByUser,
+    updateProduct,
+} from '../controllers/products.controller.js'
+
 
 export {
-    deleteWaste,
-    getAllWasteEntries,
-    getFilteredWaste,
-    getWasteById,
+    createProduct,
+    deleteProduct, deleteWaste, getAllProducts, getAllWasteEntries, getFilteredProducts, getFilteredWaste, getProductById,
+    getProductsByFrp,
+    getProductsByUser, getWasteById,
     getWasteEntriesByFrp,
     getWasteEntriesOfUser, loginUser,
-    loginWithGoogle, signupWithEmail, signupWithGoogle, updateWaste,
+    loginWithGoogle, signupWithEmail, signupWithGoogle, updateProduct, updateWaste,
     uploadWaste
 }
+

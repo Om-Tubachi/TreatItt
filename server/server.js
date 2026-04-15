@@ -23,15 +23,16 @@ const PORT = process.env.PORT || 3000
 
 
 
-import userRouter from './routes/user.routes.js'
-app.use('/api/v1/users', userRouter)
-
-
 import industryRoutes from './routes/industries.routes.js'
-app.use('/api/v1/industries', industryRoutes)
-
+import productsRouter from './routes/products.routes.js'
+import userRouter from './routes/user.routes.js'
 import wasteRoutes from './routes/waste.routes.js'
+
+
+app.use('/api/v1/users', userRouter)
+app.use('/api/v1/industries', industryRoutes)
 app.use('/api/v1/wastes', wasteRoutes)
+app.use('/api/v1/products', productsRouter)
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}\thttp://localhost:${PORT}`)
