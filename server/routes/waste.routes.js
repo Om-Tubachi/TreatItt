@@ -38,7 +38,7 @@ router
         return getAllWasteEntries(req, res, next);
     });
 
-router.use(verifyWasteProducer)
+router.use(verifyJWT, verifyWasteProducer)
 router
     .route('/:wasteId')
     .patch(updateWaste)

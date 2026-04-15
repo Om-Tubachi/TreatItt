@@ -16,8 +16,8 @@ export const verifyWasteProducer = asyncHandler(
 
             if (!exists)
                 throw new ApiError(400, "Requested user has not logged any waste entries in the platform")
-
-            req.user.role.wasteProducer = true
+            // dumbaahhhhhhhhhhhhhh
+            // req.user.role.wasteProducer = true
 
             next()
 

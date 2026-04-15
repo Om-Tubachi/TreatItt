@@ -154,18 +154,16 @@ class WasteService {
 
         const frpIds = await this.prisma.frp.findMany({
             where: {
-                where: {
-                    ...(categoryId && {
-                        category_id: categoryId
-                    }),
-                    ...(gradeId && {
-                        grade_id: gradeId
-                    }),
-                }
+                ...(categoryId && {
+                    category_id: categoryId
+                }),
+                ...(gradeId && {
+                    grade_id: gradeId
+                }),
             }
         })
 
-        // ?????????????????????????????????????????????
+        // answered:
         const wasteEntries = await this.prisma.frp_wastes.findMany({
             where: {
                 status,
@@ -173,8 +171,12 @@ class WasteService {
                 ...(collectorId && { collector_id: collectorId })
             },
             include: {
-                collectors: true,  // null if no collector_id
-                frp: {
+                collectors: true,  // waste has collectors link, go to collectors, fetch everything of a collector 
+                /**
+                 * waste → one frp row → its category row
+                                        → its grade row
+                 */
+                frp: {              
                     include: {
                         category: true,
                         grade: true
