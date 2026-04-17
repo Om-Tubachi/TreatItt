@@ -39,7 +39,7 @@
         DELETE /products/:productId
         
 
-# 2. wastes                                                      done
+# 2. wastes                                                     done
         POST   /wastes
         GET    /wastes
         GET    /wastes/:wasteId
@@ -49,7 +49,7 @@
         PUT    /wastes/:wasteId
         DELETE /wastes/:wasteId
 
-# 3. requirements
+# 3. requirements                                               done
         POST   /requirements
         GET    /requirements
         GET    /requirements/:requirementId
@@ -58,7 +58,7 @@
         PUT    /requirements/:requirementId
         DELETE /requirements/:requirementId
 
-# 4. services
+# 4. services                                                   done
         POST   /recycle-process
         GET    /recycle-process?frp=&capacity=&charges=&method=
         GET    /recycle-process/:processId
@@ -67,11 +67,11 @@
         DELETE /recycle-process/:processId
 
 
-# frp
+# frp                                                           done
     GET /frp
     GET /frp?composition=&category=&grade=&resin=
 
-# manufacturing process
+# manufacturing process                                         done
     POST   /manufacturing-processes
     GET    /manufacturing-processes                        — all system defaults (user_id = null)
     GET    /manufacturing-processes/:mpId
