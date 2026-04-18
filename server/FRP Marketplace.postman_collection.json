@@ -1,0 +1,1081 @@
+{
+	"info": {
+		"_postman_id": "28cdd7a0-c678-4665-ad53-8480e6219406",
+		"name": "FRP Marketplace",
+		"description": "Complete collection for all routes including Auth, Waste, Recycling, Collectors, and Marketplace.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Users & Auth",
+			"item": [
+				{
+					"name": "Signup Email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"Test User\",\n  \"role\": \"WASTE_PRODUCER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup Google",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"googleId\": \"google-id-string\",\n  \"email\": \"google@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/auth/signup/google",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"auth",
+								"signup",
+								"google"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Google",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"googleId\": \"google-id-string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/auth/login/google",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"auth",
+								"login",
+								"google"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Waste Entries",
+			"item": [
+				{
+					"name": "Upload Waste",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frpId\": \"frp-uuid\",\n  \"quantity\": 100,\n  \"unit\": \"kg\",\n  \"description\": \"Industrial offcuts\",\n  \"location\": \"Chennai\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/wastes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All or Filtered Waste",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wastes?frpId=uuid&location=Chennai",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes"
+							],
+							"query": [
+								{
+									"key": "frpId",
+									"value": "uuid"
+								},
+								{
+									"key": "location",
+									"value": "Chennai"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Waste By User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wastes/user/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Waste By FRP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wastes/frp/:frpId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								"frp",
+								":frpId"
+							],
+							"variable": [
+								{
+									"key": "frpId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Waste By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wastes/:wasteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								":wasteId"
+							],
+							"variable": [
+								{
+									"key": "wasteId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Waste",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 150\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/wastes/:wasteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								":wasteId"
+							],
+							"variable": [
+								{
+									"key": "wasteId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Waste",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wastes/:wasteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								":wasteId"
+							],
+							"variable": [
+								{
+									"key": "wasteId"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recyclers & Recycling Processes",
+			"item": [
+				{
+					"name": "Register Recycler",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"companyName\": \"EcoRecycle\",\n  \"license\": \"LIC123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/recyclers/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recyclers",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All or Filtered Recyclers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recyclers?location=Chennai",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recyclers"
+							],
+							"query": [
+								{
+									"key": "location",
+									"value": "Chennai"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Recycle Process",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"methodName\": \"Mechanical\",\n  \"capacity\": 500\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/recycle-processes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Processes by Recycler",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/recycler/:recyclerId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								"recycler",
+								":recyclerId"
+							],
+							"variable": [
+								{
+									"key": "recyclerId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Process by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/:processId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								":processId"
+							],
+							"variable": [
+								{
+									"key": "processId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Process",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"capacity\": 600}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/:processId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								":processId"
+							],
+							"variable": [
+								{
+									"key": "processId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Process",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/:processId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								":processId"
+							],
+							"variable": [
+								{
+									"key": "processId"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products & Marketplace",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frpId\": \"uuid\",\n  \"name\": \"Recycled Sheet\",\n  \"price\": 500\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All or Filtered Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products?category=Sheets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "Sheets"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product By User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/user/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product By FRP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/frp/:frpId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"frp",
+								":frpId"
+							],
+							"variable": [
+								{
+									"key": "frpId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"price\": 550}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products/:productId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":productId"
+							],
+							"variable": [
+								{
+									"key": "productId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/:productId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":productId"
+							],
+							"variable": [
+								{
+									"key": "productId"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Requirements",
+			"item": [
+				{
+					"name": "Create Requirement",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frpId\": \"uuid\",\n  \"expectedQuantity\": 200\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/requirements",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All or Filtered Requirements",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/requirements?frpId=uuid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements"
+							],
+							"query": [
+								{
+									"key": "frpId",
+									"value": "uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Requirement By User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/requirements/user/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Requirement By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/requirements/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Requirement",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"expectedQuantity\": 250}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/requirements/:requirementId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements",
+								":requirementId"
+							],
+							"variable": [
+								{
+									"key": "requirementId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Requirement",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/requirements/:requirementId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements",
+								":requirementId"
+							],
+							"variable": [
+								{
+									"key": "requirementId"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Collectors (Source/Consumer)",
+			"item": [
+				{
+					"name": "Register Collector",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"location\": \"Chennai\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/collectors/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collectors",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Source",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Factory A\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/collector-sources",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collector-sources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sources by Collector",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/collector-sources/collector/:collectorId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collector-sources",
+								"collector",
+								":collectorId"
+							],
+							"variable": [
+								{
+									"key": "collectorId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Consumer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Recycler B\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/collector-consumers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collector-consumers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Consumers by Collector",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/collector-consumers/collector/:collectorId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collector-consumers",
+								"collector",
+								":collectorId"
+							],
+							"variable": [
+								{
+									"key": "collectorId"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Treatments & Industries",
+			"item": [
+				{
+					"name": "Create Treatment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"type\": \"Chemical\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/treatments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Treatments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/treatments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Treatment Process By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/treatment-processes/:tpId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatment-processes",
+								":tpId"
+							],
+							"variable": [
+								{
+									"key": "tpId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Industry By Query ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/industries?industryId=uuid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"industries"
+							],
+							"query": [
+								{
+									"key": "industryId",
+									"value": "uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get FRP Static Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/frp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"frp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Manufacturing System Defaults",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/manufacturing-processes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturing-processes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
