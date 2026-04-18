@@ -79,15 +79,15 @@
     PATCH  /manufacturing-processes/:mpId
     DELETE /manufacturing-processes/:mpId
 
-# recyclers
+# recyclers                                                     done
 
     POST   /recyclers/register
-    GET    /recyclers                          — all recyclers, query: ?method=&frp=&capacity=&charges=
+    GET    /recyclers                          
     GET    /recyclers/:recyclerId
     GET    /recyclers?frp=&capacity=&charges=&treatment_process=
 
 
-# treatment_processes
+# treatment_processes                                           done
     POST   /treatment-processes
     GET    /treatment-processes
     GET    /treatment-processes/:tpId
@@ -95,7 +95,7 @@
     PATCH  /treatment-processes/:tpId
     DELETE /treatment-processes/:tpId
 
-# treatments
+# treatments                                                    done
     POST   /treatments
     GET    /treatments
     GET    /treatments/:treatmentId
@@ -105,7 +105,7 @@
     DELETE /treatments/:treatmentId
 
 
-# collectors
+# collectors                                                    done
     POST   /collectors/register
     GET    /collectors
     GET    /collectors/:collectorId
@@ -114,12 +114,12 @@
     DELETE /collectors/:collectorId
 
 
-# collector_sources (waste generators using this collection point)
+# collector_sources (waste generators using this collection point)  done
     POST   /collector-sources
     GET    /collector-sources/collector/:collectorId
     DELETE /collector-sources/:sourceId
 
-# collector_consumers (recyclers picking up from this collection point)
+# collector_consumers (recyclers picking up from this collection point) done
     POST   /collector-consumers
     GET    /collector-consumers/collector/:collectorId
     DELETE /collector-consumers/:consumerId
