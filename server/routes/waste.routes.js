@@ -10,7 +10,7 @@ import {
     uploadWaste
 } from '../controllers/index.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
-import { verifyWasteProducer } from '../middlewares/wasteProducer.middleware';
+import { verifyWasteProducer } from '../middlewares/wasteProducer.middleware.js';
 const router = Router();
 
 

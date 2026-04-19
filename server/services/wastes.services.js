@@ -1,7 +1,7 @@
 
 
 import { prisma } from '../db/prisma.js';
-import { ApiError } from '../utils/ApiError';
+import { ApiError } from '../utils/ApiError.js';
 
 class WasteService {
     constructor(prisma) {
@@ -9,8 +9,8 @@ class WasteService {
     }
 
     async create(req) {
+        const userId = req?.user?.id
         const {
-            userId,
             frpId,
             manufacturingProcessId,
             collectorId,
@@ -25,19 +25,19 @@ class WasteService {
         const result = await this.prisma.$queryRaw`SELECT
     EXISTS(SELECT 1 FROM "users"     WHERE id = ${userId}::uuid)    AS user_exists,
     EXISTS(SELECT 1 FROM "frp"  WHERE id = ${frpId}::uuid)  AS frp_exists,
-    EXISTS(SELECT 1 FROM "manufacturing_processes" WHERE id = ${manufacturingProcessId}::uuid) AS manufacturingProcess_exists
+    EXISTS(SELECT 1 FROM "manufacturing_processes" WHERE id = ${manufacturingProcessId}::uuid) AS manufacturingprocess_exists
 `;
 
-        const { user_exists, frp_exists, manufacturingProcess_exists } = result[0];
-
-        if (!user_exists || !frp_exists || !manufacturingProcess_exists)
+        const { user_exists, frp_exists, manufacturingprocess_exists } = result[0];
+        console.table(result[0])
+        if (!user_exists || !frp_exists || !manufacturingprocess_exists)
             throw new ApiError(409, "invalid input for user or frp or manufacturing quantity")
 
         const payload = {
-            userId,
-            manufacturingProcessId,
-            frpId,
-            collectorId,
+            u_id: userId,
+            manufacturing_process_id: manufacturingProcessId,
+            frp_id: frpId,
+            collector_id: collectorId,
             quantity,
             date,
             status: 'un-processed'
@@ -78,14 +78,13 @@ class WasteService {
             throw new ApiError(400, "user id required is required")
 
         const results = await this.prisma.$queryRaw`
-            select exists(select 1 from "users" where id = ${userId} :: uuid) as userInUsers,
-             exists(select 1 from "frp_wastes" where u_id = ${userId} :: uuid) as userInWastes,
-
+            select exists(select 1 from "users" where id = ${userId} :: uuid) as user_in_users,
+             exists(select 1 from "frp_wastes" where u_id = ${userId} :: uuid) as user_in_wastes;
         `
 
-        const { userInUsers, userInWastes } = results[0]
+        const { user_in_users, user_in_wastes } = results[0]
 
-        if (!userInUsers || !userInWastes)
+        if (!user_in_users || !user_in_wastes)
             throw new ApiError(409, "Either user is not registered on the platform or user has no waste entries")
 
 
@@ -111,7 +110,7 @@ class WasteService {
     async getAllWasteEntries(req) {
         const wasteEntries = await this.prisma.frp_wastes.findMany()
 
-        if (!wasteEntries.lengt)
+        if (!wasteEntries.length)
             throw new ApiError(500, "Something went wrong while fetching waste entries")
 
         return wasteEntries
@@ -124,14 +123,14 @@ class WasteService {
             throw new ApiError(400, "frp id is required")
 
         const results = await this.prisma.$queryRaw`
-        select
-            exists(select 1 from "frp" where id = ${frpId}::uuid) as frpExists,
-            exists(select 1 from "frp_wastes" where frp_id = ${frpId}::uuid) as frpInWastes
-    `
+    SELECT
+        EXISTS(SELECT 1 FROM "frp" WHERE id = ${frpId}::uuid) AS frp_exists,
+        EXISTS(SELECT 1 FROM "frp_wastes" WHERE frp_id = ${frpId}::uuid) AS frp_in_wastes
+`
 
-        const { frpExists, frpInWastes } = results[0]
+        const { frp_exists, frp_in_wastes } = results[0]
 
-        if (!frpExists || !frpInWastes)
+        if (!frp_exists || !frp_in_wastes)
             throw new ApiError(409, "Either frp does not exist or has no waste entries")
 
         const wasteEntries = await this.prisma.$queryRaw`
@@ -150,9 +149,9 @@ class WasteService {
             collectorId,
             categoryId,
             gradeId
-        } = req.queryParams
+        } = req.query
 
-        const frpIds = await this.prisma.frp.findMany({
+        const frps = await this.prisma.frp.findMany({
             where: {
                 ...(categoryId && {
                     category_id: categoryId
@@ -162,7 +161,8 @@ class WasteService {
                 }),
             }
         })
-
+        // console.log(frpIds);
+        const frpIds = frps.map((frp) => frp.id)
         // answered:
         const wasteEntries = await this.prisma.frp_wastes.findMany({
             where: {
@@ -174,12 +174,16 @@ class WasteService {
                 collectors: true,  // waste has collectors link, go to collectors, fetch everything of a collector 
                 /**
                  * waste → one frp row → its category row
-                                        → its grade row
+                 *                     → its grade row
                  */
-                frp: {              
+                frp: {
                     include: {
-                        category: true,
-                        grade: true
+                        category: {
+                            select: { id: true, category_name: true }
+                        },
+                        grade: {
+                            select: { id: true, grade_name: true }
+                        }
                     }
                 }
             }
@@ -197,26 +201,33 @@ AND (f.category_id = $1 OR $1 IS NULL)
 AND (f.grade_id = $2 OR $2 IS NULL)
          */
 
-        if (!wasteEntries.lengt)
+        if (!wasteEntries.length)
             throw new ApiError(500, "Something went wrong while fetching waste entries")
 
         return wasteEntries
     }
 
     async updateWaste(req) {
-        const { wasteId } = req.params;
-        const updateData = req.body;
+        const { wasteId } = req.params, userId = req?.user?.id;
+        const { frpId, manufacturingProcessId, collectorId, quantity, date, status } = req.body;
 
         if (!wasteId) throw new ApiError(400, "Waste ID is required");
 
         const updatedWaste = await this.prisma.frp_wastes.update({
             where: { id: wasteId },
-            data: updateData
+            data: {
+                ...(frpId && { frp_id: frpId }),
+                ...(manufacturingProcessId && { manufacturing_process_id: manufacturingProcessId }),
+                ...(collectorId && { collector_id: collectorId }),
+                ...(userId && { u_id: userId }),
+                ...(quantity && { quantity: parseFloat(quantity) }),
+                ...(date && { date }),
+                ...(status && { status }),
+                updatedat: new Date()
+            }
         });
 
-        if (!updatedWaste) {
-            throw new ApiError(500, "Failed to update waste entry");
-        }
+        if (!updatedWaste) throw new ApiError(500, "Failed to update waste entry");
 
         return updatedWaste;
     }

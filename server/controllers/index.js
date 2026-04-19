@@ -4,6 +4,27 @@ import {
     getConsumersByCollector
 } from './collectorConsumers.controller.js'
 
+import { getFrp } from './frp.controller.js'
+
+import {
+    createManufacturingProcess,
+    deleteManufacturingProcess,
+    getManufacturingProcessById,
+    getManufacturingProcessesByUser,
+    getSystemDefaults,
+    updateManufacturingProcess
+} from './manufacturingProcess.controller.js'
+
+import {
+    createRecycleProcess,
+    deleteRecycleProcess,
+    getFilteredRecycleProcesses,
+    getRecycleProcessById,
+    getRecycleProcessesByRecycler,
+    updateRecycleProcess
+
+} from './recycleProcess.controller.js'
+
 import {
     deleteCollector,
     getAllCollectors,
@@ -37,24 +58,7 @@ import {
     getFilteredRecyclers
 } from './recycler.controller.js'
 
-import {
-    createTreatmentProcess,
-    deleteTreatmentProcess,
-    getAllTreatmentProcesses,
-    getTreatmentProcessById,
-    getTreatmentProcessesByRecycler,
-    updateTreatmentProcess
-} from './treatmentProcess.controller.js'
 
-import {
-    createTreatment,
-    deleteTreatment,
-    getAllTreatments,
-    getFilteredTreatments,
-    getTreatmentById,
-    getTreatmentsByRecycler,
-    updateTreatment
-} from './treatments.controller.js'
 
 import {
     loginUser,
@@ -73,6 +77,36 @@ import {
     updateWaste,
     uploadWaste
 } from './wastes.controller.js'
+
+import {
+    createTreatmentProcess,
+    deleteTreatmentProcess, getAllTreatmentProcesses,
+    getTreatmentProcessById,
+    getTreatmentProcessesByRecycler,
+    updateTreatmentProcess,
+
+} from './treatmentProcess.controller.js'
+
+import {
+    createTreatment,
+    deleteTreatment,
+    getAllTreatments,
+    getFilteredTreatments,
+    getTreatmentById,
+    getTreatmentsByRecycler,
+    updateTreatment
+} from './treatments.controller.js'
+
+import {
+    createRequirement,
+    deleteRequirement,
+    getAllRequirements,
+    getRequirementById,
+    getRequirementsByFrp,
+    updateRequirement,
+    getFilteredRequirements,
+    getRequirementsByUser
+} from './requirements.controller.js'
 
 export {
     createCollectorConsumer,
@@ -123,5 +157,27 @@ export {
     updateTreatment,
     updateTreatmentProcess,
     updateWaste,
-    uploadWaste
+    uploadWaste,
+    getFrp,
+    createManufacturingProcess,
+    deleteManufacturingProcess,
+    getManufacturingProcessById,
+    getManufacturingProcessesByUser,
+    getSystemDefaults,
+    updateManufacturingProcess,
+    createRecycleProcess,
+    deleteRecycleProcess,
+    getFilteredRecycleProcesses,
+    getRecycleProcessById,
+    getRecycleProcessesByRecycler,
+    updateRecycleProcess,
+    createRequirement,
+    deleteRequirement,
+    getAllRequirements,
+    getRequirementById,
+    getRequirementsByFrp,
+    updateRequirement,
+    getFilteredRequirements,
+    getRequirementsByUser
+
 }

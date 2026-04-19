@@ -6,11 +6,11 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 export const verifyWasteProducer = asyncHandler(
     async (req, res, next) => {
         try {
-            const { userId } = req.body
+            const userId = req?.user?.id
             if (!userId) throw new ApiError(400, "Did not recieve user id -> in middleware")
 
             const result = await prisma.$queryRaw`
-            select exists(select 1 from "frp_wastes" where u_id = "${userId}") as exists
+            select exists(select 1 from "frp_wastes" where u_id = ${userId}) as exists
             `
             const { exists } = result[0]
 
