@@ -8,8 +8,8 @@ class RecycleProcessService {
     }
 
     async create(req) {
+        const userId = req.user.id;
         const {
-            recyclerId,
             treatmentId,
             capacityKg,
             schedules,
@@ -17,13 +17,12 @@ class RecycleProcessService {
             charges
         } = req.body;
 
-        if ([recyclerId, treatmentId].some(f => !f) || !capacityKg) {
+        if (!treatmentId || !capacityKg)   
             throw new ApiError(400, "Missing required fields");
-        }
 
         const result = await this.prisma.$queryRaw`
             SELECT
-                EXISTS(SELECT 1 FROM "recyclers"   WHERE u_id = ${recyclerId}::uuid)  AS recycler_exists,
+                EXISTS(SELECT 1 FROM "recyclers"   WHERE u_id = ${userId}::uuid)  AS recycler_exists,
                 EXISTS(SELECT 1 FROM "treatments"  WHERE id   = ${treatmentId}::uuid) AS treatment_exists
         `;
 
@@ -34,7 +33,7 @@ class RecycleProcessService {
 
         const recycleProcess = await this.prisma.recycler_processes.create({
             data: {
-                recycler_id: recyclerId,
+                recycler_id: userId,
                 treatment_id: treatmentId,
                 capacity_kg: capacityKg,
                 schedules,
@@ -167,16 +166,10 @@ class RecycleProcessService {
             where: {
                 ...(capacity && { capacity_kg: { gte: parseFloat(capacity) } }),
                 ...(charges && { charges: { lte: parseFloat(charges) } }),
-                ...(frp && {
+                ...((frp || method) && {
                     treatments: {
-                        frp_id: frp
-                    }
-                }),
-                ...(method && {
-                    treatments: {
-                        treatment_processes: {
-                            method_id: method
-                        }
+                        ...(frp && { frp_id: frp }),
+                        ...(method && { treatment_processes: { method_id: method } })
                     }
                 })
             },

@@ -52,7 +52,7 @@ const getFilteredProducts = asyncHandler(
         const products = await productService.getFilteredProducts(req);
         res
             .status(200)
-            .json(new ApiResponse(200, products, 'Filtered products retrieved successfully'));
+            .json(new ApiResponse(200, products, 'Filtered products retrieved successfully hehe'));
     }
 );
 

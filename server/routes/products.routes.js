@@ -39,9 +39,8 @@ router
     });
 
 router.use(verifyJWT, verifyManufacturer)
-router
-    .route('/:productId')
-    .patch(deleteProduct)
-    .delete(updateProduct);
+router.route('/:productId')
+    .patch(updateProduct)
+    .delete(deleteProduct);
 
 export default router;

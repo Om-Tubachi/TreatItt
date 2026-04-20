@@ -15,13 +15,13 @@ class TreatmentProcessService {
 
         const result = await this.prisma.$queryRaw`
             SELECT
-                EXISTS(SELECT 1 FROM "users"             WHERE id = ${recyclerId}::uuid) AS user_exists,
+                EXISTS(SELECT 1 FROM "recyclers"             WHERE u_id = ${recyclerId}::uuid) AS user_exists,
                 EXISTS(SELECT 1 FROM "treatment_methods" WHERE id = ${methodId}::uuid)  AS method_exists
         `;
 
         const { user_exists, method_exists } = result[0];
 
-        if (!user_exists)  throw new ApiError(404, "User not found");
+        if (!user_exists)  throw new ApiError(404, "User not registered as a recycler");
         if (!method_exists) throw new ApiError(409, "Invalid treatment method");
 
         const treatmentProcess = await this.prisma.treatment_processes.create({

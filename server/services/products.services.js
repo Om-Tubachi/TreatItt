@@ -7,7 +7,8 @@ class ProductService {
     }
 
     async create(req) {
-        const { userId, frpId, description, date } = req.body;
+        const userId = req?.user?.id;
+        const { frpId, description, date } = req.body;
 
         if ([userId, frpId].some(f => !f))
             throw new ApiError(400, "Missing required fields");
@@ -97,20 +98,18 @@ class ProductService {
 
         if (!compositionId && !frp)
             throw new ApiError(400, "At least one filter is required");
-        
+
         const products = await this.prisma.products.findMany({
-            where: { OR: [
-                {frp_id: frp},
-                {
-                    frp:{
-                        composition_id:compositionId
-                    }
-                }
-            ] }
+            where: {
+                OR: [
+                    ...(frp ? [{ frp_id: frp }] : []),
+                    ...(compositionId ? [{ frp: { composition_id: compositionId } }] : [])
+                ]
+            }
         });
 
         if (!products.length)
-            throw new ApiError(500, "Something went wrong while fetching products");
+            throw new ApiError(210, "No products found matching the provided filters");
 
         return products;
     }
@@ -127,7 +126,12 @@ class ProductService {
 
         const updatedProduct = await this.prisma.products.update({
             where: { id: productId },
-            data: { ...updateData }
+            data: {
+                ...(updateData.frpId && { frp_id: updateData.frpId }),
+                ...(updateData.description && { description: updateData.description }),
+                ...(updateData.date && { date: updateData.date }),
+                updatedat: new Date()
+            }
         })
 
         if (!updatedProduct)

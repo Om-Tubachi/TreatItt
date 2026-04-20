@@ -41,12 +41,13 @@ class RecyclerService {
     }
 
     async getRecyclerById(req) {
+        // recycler id is the same as user id since they are in one-to-one relationship
         const { recyclerId } = req.params;
 
         if (!recyclerId) throw new ApiError(400, "Recycler ID is required");
 
         const recycler = await this.prisma.recyclers.findUnique({
-            where: { id: recyclerId }
+            where: { u_id: recyclerId }
         });
 
         if (!recycler) throw new ApiError(404, "Recycler not found");
@@ -88,8 +89,7 @@ class RecyclerService {
                     },
                     select: {
                         capacity_kg: true,
-                        charges_per_kg: true,
-                        arrangements: true,
+                        charges: true,
                         schedules: true,
                         treatments: {
                             select: {
@@ -111,8 +111,7 @@ class RecyclerService {
             }
         });
 
-        if (!recyclers.length)
-            throw new ApiError(500, "Something went wrong while fetching recyclers");
+        if (!recyclers.length) throw new ApiError(404, "No recyclers found");
 
         return recyclers;
     }
