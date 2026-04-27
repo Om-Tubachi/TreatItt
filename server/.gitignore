@@ -1,3 +1,6 @@
 node_modules
 .env
 
+googleClient.json
+
+me_todos.md

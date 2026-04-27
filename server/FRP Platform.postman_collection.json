@@ -1,0 +1,1233 @@
+{
+	"info": {
+		"_postman_id": "560c1b47-86bb-439b-9ac6-b8e42c67a322",
+		"name": "FRP Platform",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Users & Auth",
+			"item": [
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "RamSingh12"
+								},
+								{
+									"key": "fname",
+									"value": "Ram",
+									"type": "text"
+								},
+								{
+									"key": "mname",
+									"value": "Tomar",
+									"type": "text"
+								},
+								{
+									"key": "lname",
+									"value": "Singh",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "Ram12@gmail.com"
+								},
+								{
+									"key": "password",
+									"value": "1234"
+								},
+								{
+									"key": "companyName",
+									"value": "Mettle and metal",
+									"type": "text"
+								},
+								{
+									"key": "designation",
+									"value": "Employee ",
+									"type": "text"
+								},
+								{
+									"key": "contactNum",
+									"value": "1234567890",
+									"type": "text"
+								},
+								{
+									"key": "frpIndustryId",
+									"value": "1ae3c702-48ea-443c-b262-5aa5d616fbc4",
+									"description": "Building construction",
+									"type": "text"
+								},
+								{
+									"key": "address",
+									"value": "Chennai",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/users/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "omtubachi06@gmail.com"
+								},
+								{
+									"key": "password",
+									"value": "1234"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/users/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Google Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "googleId",
+									"value": "12345"
+								},
+								{
+									"key": "email",
+									"value": "google@example.com"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/users/auth/signup/google",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"auth",
+								"signup",
+								"google"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Wastes",
+			"item": [
+				{
+					"name": "Upload Waste",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzYzM3MjBiLTA3NzItNDY2OS1hZWQ2LTI1NTI5NTZlZjM1MiIsImVtYWlsIjoib210dWJhY2hpMDZAZ21haWwuY29tIiwidXNlcm5hbWUiOiJvbS10dWJhY2hpIiwiaWF0IjoxNzc2NTk0ODc5LCJleHAiOjE3NzY1OTU4Mzl9.GTmv2TYX0XTJlFdjNEr9_cwzcn96_oOd3Lil_z88MNE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "frpId",
+									"value": "35c0a6fa-2e81-4e60-adbb-7139ca06c79a",
+									"description": "roofing"
+								},
+								{
+									"key": "quantity",
+									"value": "223"
+								},
+								{
+									"key": "date",
+									"value": "2025-04-16T00:00:00.000Z"
+								},
+								{
+									"key": "description",
+									"value": "FRP Scrap",
+									"disabled": true
+								},
+								{
+									"key": "location",
+									"value": "Chennai",
+									"disabled": true
+								},
+								{
+									"key": "userId",
+									"value": "63c055fa-75f5-44f6-976d-0a249750bbaf",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "manufacturingProcessId",
+									"value": "08e89ee2-6eb5-4cc6-b3a4-2e7cdd3650c1",
+									"description": "pressure bag m",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/wastes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Waste",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzYzA1NWZhLTc1ZjUtNDRmNi05NzZkLTBhMjQ5NzUwYmJhZiIsImVtYWlsIjoiUmFtMTJAZ21haWwuY29tIiwidXNlcm5hbWUiOiJyYW1zaW5naDEyIiwiaWF0IjoxNzc2NTk0MTY5LCJleHAiOjE3NzY1OTUxMjl9.AedSsmesKIs7sc160c1prQAlydNWM6mI_HKXJV0AU-w",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"frpId\": \"0a3ce745-544e-48c9-8f33-edccac246650\",\r\n    \"quantity\": 458,\r\n    \"date\": \"2025-04-18T00:00:00.000Z\",\r\n    \"manufacturingProcessId\": \"08d5ab84-c74c-41e8-a93c-67a642aaeb4b\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/wastes/:wasteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								":wasteId"
+							],
+							"variable": [
+								{
+									"key": "wasteId",
+									"value": "0f2912ac-0fdb-4443-bfd8-36b40aafd484"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Waste",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{base_url}}/wastes/user/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								"user",
+								":userId"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "63c055fa-75f5-44f6-976d-0a249750bbaf"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get FRP Waste",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wastes/frp/:frpId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								"frp",
+								":frpId"
+							],
+							"variable": [
+								{
+									"key": "frpId",
+									"value": "0a3ce745-544e-48c9-8f33-edccac246650"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Waste",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzYzM3MjBiLTA3NzItNDY2OS1hZWQ2LTI1NTI5NTZlZjM1MiIsImVtYWlsIjoib210dWJhY2hpMDZAZ21haWwuY29tIiwidXNlcm5hbWUiOiJvbS10dWJhY2hpIiwiaWF0IjoxNzc2NTk0ODc5LCJleHAiOjE3NzY1OTU4Mzl9.GTmv2TYX0XTJlFdjNEr9_cwzcn96_oOd3Lil_z88MNE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wastes/:wasteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								":wasteId"
+							],
+							"variable": [
+								{
+									"key": "wasteId",
+									"value": "4cec9e71-86e1-4f53-b570-04fc583ee6b8"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wastes/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wastes",
+								""
+							],
+							"query": [
+								{
+									"key": "collectorId",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "6a18acae-e8d5-46b9-bdc7-776cb2bb610c",
+									"disabled": true
+								},
+								{
+									"key": "gradeId",
+									"value": "52a4a954-1831-4373-b9a6-075e9e3bdcae",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "un-processed",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzYzM3MjBiLTA3NzItNDY2OS1hZWQ2LTI1NTI5NTZlZjM1MiIsImVtYWlsIjoib210dWJhY2hpMDZAZ21haWwuY29tIiwidXNlcm5hbWUiOiJvbS10dWJhY2hpIiwiaWF0IjoxNzc2NjczOTA2LCJleHAiOjE3NzY2NzQ4NjZ9.Kmm_6CK2KN5YvnxuVwRBVnwz8B5syQnMn1miBnclRXI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "frpId",
+									"value": "255687d9-3c7c-4943-b6e3-d225da3a1786",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "corrosion free volcanic fibre sheets",
+									"type": "text"
+								},
+								{
+									"key": "date",
+									"value": "2025-01-01T00:00:00.000Z",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer ",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/user/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "c3c3720b-0772-4669-aed6-2552956ef352"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzYzM3MjBiLTA3NzItNDY2OS1hZWQ2LTI1NTI5NTZlZjM1MiIsImVtYWlsIjoib210dWJhY2hpMDZAZ21haWwuY29tIiwidXNlcm5hbWUiOiJvbS10dWJhY2hpIiwiaWF0IjoxNzc2NjczOTA2LCJleHAiOjE3NzY2NzQ4NjZ9.Kmm_6CK2KN5YvnxuVwRBVnwz8B5syQnMn1miBnclRXI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "frpId",
+									"value": "255687d9-3c7c-4943-b6e3-d225da3a1786",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Updated FRP Sheet",
+									"type": "text"
+								},
+								{
+									"key": "date",
+									"value": "2025-05-01T00:00:00.000Z",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/products/:productId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":productId"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "dc2ee2e3-d083-43a8-8519-856a3191094b"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzYzM3MjBiLTA3NzItNDY2OS1hZWQ2LTI1NTI5NTZlZjM1MiIsImVtYWlsIjoib210dWJhY2hpMDZAZ21haWwuY29tIiwidXNlcm5hbWUiOiJvbS10dWJhY2hpIiwiaWF0IjoxNzc2NjczOTA2LCJleHAiOjE3NzY2NzQ4NjZ9.Kmm_6CK2KN5YvnxuVwRBVnwz8B5syQnMn1miBnclRXI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/:productId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":productId"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "9c05ade3-3c42-46ae-9b57-9dca8067a097"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "filtered/all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products?compositionId=41215b8a-2446-4ad6-9e62-91247148b222&frp=255687d9-3c7c-4943-b6e3-d225da3a1787",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "compositionId",
+									"value": "41215b8a-2446-4ad6-9e62-91247148b222"
+								},
+								{
+									"key": "frp",
+									"value": "255687d9-3c7c-4943-b6e3-d225da3a1787"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recyclers & Processes",
+			"item": [
+				{
+					"name": "Register Recycler",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "companyName",
+									"value": "RecycleCorp"
+								},
+								{
+									"key": "license",
+									"value": "XYZ789"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/recyclers/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recyclers",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Recycle Process",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "methodName",
+									"value": "Pyrolysis"
+								},
+								{
+									"key": "capacity",
+									"value": "1000"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/recycle-processes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Recycle Process",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "capacity",
+									"value": "1200"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/:processId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								":processId"
+							],
+							"variable": [
+								{
+									"key": "processId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recyclers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recyclers/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recyclers",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recycle Process By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/:processId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								":processId"
+							],
+							"variable": [
+								{
+									"key": "processId",
+									"value": "d3e7f384-40fd-476c-8bac-c57b8c3ae17d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recycler Processes by Recycler ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/recycler/:recyclerId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								"recycler",
+								":recyclerId"
+							],
+							"variable": [
+								{
+									"key": "recyclerId",
+									"value": "c3c3720b-0772-4669-aed6-2552956ef352"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filtered Recycle Process",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/?capacity=500&frp=cce17cdc-fe10-426e-bc54-56c9331b0c56&method=8a726d2d-4ffb-4089-bf17-64304576d8f9",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								""
+							],
+							"query": [
+								{
+									"key": "capacity",
+									"value": "500"
+								},
+								{
+									"key": "frp",
+									"value": "cce17cdc-fe10-426e-bc54-56c9331b0c56"
+								},
+								{
+									"key": "charges",
+									"value": "9",
+									"disabled": true
+								},
+								{
+									"key": "method",
+									"value": "8a726d2d-4ffb-4089-bf17-64304576d8f9"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recycle Process",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzYzM3MjBiLTA3NzItNDY2OS1hZWQ2LTI1NTI5NTZlZjM1MiIsImVtYWlsIjoib210dWJhY2hpMDZAZ21haWwuY29tIiwidXNlcm5hbWUiOiJvbS10dWJhY2hpIiwiaWF0IjoxNzc2NjgwMTQyLCJleHAiOjE3NzY2ODM2ODJ9.f4SDpx1pGKD1EnH3t0cqbSKLb-TT6EI-8RQbg9D5eMw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "charges",
+									"value": "15",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/recycle-processes/:processId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recycle-processes",
+								":processId"
+							],
+							"variable": [
+								{
+									"key": "processId",
+									"value": "d3e7f384-40fd-476c-8bac-c57b8c3ae17d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recycler by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recyclers/:recyclerId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recyclers",
+								":recyclerId"
+							],
+							"variable": [
+								{
+									"key": "recyclerId",
+									"value": "c3c3720b-0772-4669-aed6-2552956ef352"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recyclers Filtered",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recyclers/?frp=cce17cdc-fe10-426e-bc54-56c9331b0c56",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recyclers",
+								""
+							],
+							"query": [
+								{
+									"key": "capacity",
+									"value": "500",
+									"disabled": true
+								},
+								{
+									"key": "frp",
+									"value": "cce17cdc-fe10-426e-bc54-56c9331b0c56"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Requirements",
+			"item": [
+				{
+					"name": "Create Requirement",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "frpId",
+									"value": "uuid"
+								},
+								{
+									"key": "expectedQuantity",
+									"value": "300"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/requirements",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Requirements",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/requirements/user/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Requirement",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "expectedQuantity",
+									"value": "400"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/requirements/:requirementId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"requirements",
+								":requirementId"
+							],
+							"variable": [
+								{
+									"key": "requirementId"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Collectors",
+			"item": [
+				{
+					"name": "Register Collector",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "location",
+									"value": "Bangalore"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/collectors/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collectors",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Source",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Factory Hub"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/collector-sources",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collector-sources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Consumer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "End User A"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/collector-consumers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"collector-consumers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Treatments & Industry",
+			"item": [
+				{
+					"name": "Create Treatment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "type",
+									"value": "Grinding"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/treatments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Treatment Process",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "processName",
+									"value": "Standard Scrub"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/treatment-processes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatment-processes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Industry",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/industries?industryId=uuid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"industries"
+							],
+							"query": [
+								{
+									"key": "industryId",
+									"value": "uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Manufacturing",
+			"item": [
+				{
+					"name": "Create Process",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Molding"
+								},
+								{
+									"key": "cost",
+									"value": "200"
+								},
+								{
+									"key": "manu",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/manufacturing-processes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturing-processes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Processes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/manufacturing-processes/user/:userId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturing-processes",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000/api/v1"
+		},
+		{
+			"key": "accessToken",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2MwNTVmYS03NWY1LTQ0ZjYtOTc2ZC0wYTI0OTc1MGJiYWYiLCJlbWFpbCI6IlJhbTEyQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoicmFtc2luZ2gxMiIsImlhdCI6MTc3NjU5MTAyOCwiZXhwIjoxNzc2NTkxOTg4fQ.8I_C4C-TZtTnvoVLi1tA86GImLgX-zMxcdGDJbMVDiE"
+		},
+		{
+			"key": "userId",
+			"value": "c3c3720b-0772-4669-aed6-2552956ef352",
+			"type": "string"
+		}
+	]
+}

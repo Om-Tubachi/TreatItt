@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  previewFeatures = ["driverAdapters", "omitApi"]
 }
 
 datasource db {
@@ -18,26 +18,36 @@ model industries {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model users {
-  id              String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username        String      @unique @db.VarChar(255)
-  first_name      String      @db.VarChar(255)
-  middle_name     String?     @db.VarChar(255)
-  last_name       String      @db.VarChar(255)
-  company_name    String?     @db.VarChar(255)
-  designation     String?     @db.VarChar(255)
-  email           String      @unique @db.VarChar(255)
-  contact_number  String?     @db.VarChar(20)
-  frp_industry_id String?     @db.Uuid
-  address         String?
-  refresh_token   String?     @unique
-  google_id       String?     @unique @db.VarChar(255)
-  linkedin_id     String?     @unique @db.VarChar(255)
-  is_verified     Boolean?    @default(false)
-  createdat       DateTime?   @default(now()) @db.Timestamp(6)
-  updatedat       DateTime?   @default(now()) @db.Timestamp(6)
-  deletedat       DateTime?   @db.Timestamp(6)
-  password        String?     @db.VarChar(255)
-  industries      industries? @relation(fields: [frp_industry_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                      String                    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                String                    @unique @db.VarChar(255)
+  first_name              String                    @db.VarChar(255)
+  middle_name             String?                   @db.VarChar(255)
+  last_name               String                    @db.VarChar(255)
+  company_name            String?                   @db.VarChar(255)
+  designation             String?                   @db.VarChar(255)
+  email                   String                    @unique @db.VarChar(255)
+  contact_number          String?                   @db.VarChar(20)
+  frp_industry_id         String?                   @db.Uuid
+  address                 String?
+  refresh_token           String?                   @unique
+  google_id               String?                   @unique @db.VarChar(255)
+  linkedin_id             String?                   @unique @db.VarChar(255)
+  is_verified             Boolean?                  @default(false)
+  createdat               DateTime?                 @default(now()) @db.Timestamp(6)
+  updatedat               DateTime?                 @default(now()) @db.Timestamp(6)
+  deletedat               DateTime?                 @db.Timestamp(6)
+  password                String?                   @db.VarChar(255)
+  collector_consumers     collector_consumers[]
+  collector_sources       collector_sources[]
+  collectors              collectors[]
+  frp_requirements        frp_requirements[]
+  frp_wastes              frp_wastes[]
+  manufacturing_processes manufacturing_processes[]
+  products                products[]
+  recyclers               recyclers?
+  treatment_processes     treatment_processes[]
+  treatments              treatments[]
+  industries              industries?               @relation(fields: [frp_industry_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -45,4 +55,228 @@ model demo {
   id   String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String?
   age  Int?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model category {
+  id                   String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  category_name        String  @unique @db.VarChar(255)
+  category_description String?
+  frp                  frp[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model collector_consumers {
+  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  collector_id String?     @db.Uuid
+  u_id         String?     @db.Uuid
+  collectors   collectors? @relation(fields: [collector_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users?      @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model collector_sources {
+  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  collector_id String?     @db.Uuid
+  u_id         String?     @db.Uuid
+  collectors   collectors? @relation(fields: [collector_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users?      @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model collector_types {
+  id             String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  collector_id   String?     @db.Uuid
+  frp_id         String?     @db.Uuid
+  capacity_kg    Decimal?    @db.Decimal
+  charges_per_kg Decimal?    @db.Decimal
+  arrangements   String?
+  status         String?     @db.VarChar
+  createdat      DateTime?   @default(now()) @db.Timestamp(6)
+  updatedat      DateTime?   @default(now()) @db.Timestamp(6)
+  deletedat      DateTime?   @db.Timestamp(6)
+  collectors     collectors? @relation(fields: [collector_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frp            frp?        @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model collectors {
+  id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  u_id                String?               @db.Uuid
+  address             String?
+  latitude            Decimal?              @db.Decimal
+  longitude           Decimal?              @db.Decimal
+  createdat           DateTime?             @default(now()) @db.Timestamp(6)
+  updatedat           DateTime?             @default(now()) @db.Timestamp(6)
+  deletedat           DateTime?             @db.Timestamp(6)
+  collector_consumers collector_consumers[]
+  collector_sources   collector_sources[]
+  collector_types     collector_types[]
+  users               users?                @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frp_wastes          frp_wastes[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model composition {
+  id                      String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  composition_name        String  @unique @db.VarChar(255)
+  composition_description String?
+  frp                     frp[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model frp {
+  id               String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  composition_id   String?            @db.Uuid
+  category_id      String?            @db.Uuid
+  grade_id         String?            @db.Uuid
+  resin_id         String?            @db.Uuid
+  description      String?
+  collector_types  collector_types[]
+  category         category?          @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  composition      composition?       @relation(fields: [composition_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  grade            grade?             @relation(fields: [grade_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  resin            resin?             @relation(fields: [resin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frp_requirements frp_requirements[]
+  frp_wastes       frp_wastes[]
+  products         products[]
+  treatments       treatments[]
+
+  @@unique([composition_id, category_id, grade_id, resin_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model frp_requirements {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  u_id              String?   @db.Uuid
+  frp_id            String?   @db.Uuid
+  est_req_per_month Decimal?  @db.Decimal
+  act_req_per_month Decimal?  @db.Decimal
+  date              DateTime? @db.Timestamp(6)
+  status            String?   @db.VarChar
+  createdat         DateTime? @default(now()) @db.Timestamp(6)
+  updatedat         DateTime? @default(now()) @db.Timestamp(6)
+  deletedat         DateTime? @db.Timestamp(6)
+  frp               frp?      @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users             users?    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model frp_wastes {
+  id                       String                   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  u_id                     String?                  @db.Uuid
+  frp_id                   String?                  @db.Uuid
+  manufacturing_process_id String?                  @db.Uuid
+  collector_id             String?                  @db.Uuid
+  quantity                 Decimal?                 @db.Decimal
+  date                     DateTime?                @db.Timestamp(6)
+  status                   String?                  @db.VarChar
+  createdat                DateTime?                @default(now()) @db.Timestamp(6)
+  updatedat                DateTime?                @default(now()) @db.Timestamp(6)
+  deletedat                DateTime?                @db.Timestamp(6)
+  collectors               collectors?              @relation(fields: [collector_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frp                      frp?                     @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  manufacturing_processes  manufacturing_processes? @relation(fields: [manufacturing_process_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                    users?                   @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model grade {
+  id                String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  grade_name        String  @unique @db.VarChar(255)
+  grade_description String?
+  frp               frp[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model manufacturing_processes {
+  id                         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                    String?      @db.Uuid
+  manufacturing_process_name String?      @db.VarChar(255)
+  createdat                  DateTime?    @default(now()) @db.Timestamp(6)
+  updatedat                  DateTime?    @default(now()) @db.Timestamp(6)
+  deletedat                  DateTime?    @db.Timestamp(6)
+  manufacturing_process_desc String?
+  frp_wastes                 frp_wastes[]
+  users                      users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model products {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  u_id        String?   @db.Uuid
+  frp_id      String?   @db.Uuid
+  description String?
+  date        DateTime? @db.Timestamp(6)
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+  updatedat   DateTime? @default(now()) @db.Timestamp(6)
+  deletedat   DateTime? @db.Timestamp(6)
+  frp         frp?      @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users       users?    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model recycler_processes {
+  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  recycler_id  String?     @db.Uuid
+  treatment_id String?     @db.Uuid
+  capacity_kg  Decimal?    @db.Decimal
+  schedules    String?
+  date         DateTime?   @db.Timestamp(6)
+  charges      Decimal?    @db.Decimal
+  createdat    DateTime?   @default(now()) @db.Timestamp(6)
+  updatedat    DateTime?   @default(now()) @db.Timestamp(6)
+  deletedat    DateTime?   @db.Timestamp(6)
+  recyclers    recyclers?  @relation(fields: [recycler_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+  treatments   treatments? @relation(fields: [treatment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model recyclers {
+  id                 String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  u_id               String?              @unique @db.Uuid
+  address            String?
+  createdat          DateTime?            @default(now()) @db.Timestamp(6)
+  updatedat          DateTime?            @default(now()) @db.Timestamp(6)
+  deletedat          DateTime?            @db.Timestamp(6)
+  recycler_processes recycler_processes[]
+  users              users?               @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model resin {
+  id                String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  resin_name        String  @unique @db.VarChar(255)
+  resin_description String?
+  frp               frp[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model treatment_methods {
+  id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  method              String                @unique @db.VarChar
+  treatment_processes treatment_processes[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model treatment_processes {
+  id                String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  method_id         String?            @db.Uuid
+  recycler_id       String?            @db.Uuid
+  process           String?
+  treatment_methods treatment_methods? @relation(fields: [method_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users             users?             @relation(fields: [recycler_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  treatments        treatments[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model treatments {
+  id                   String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  recycler_id          String?              @db.Uuid
+  treatment_process_id String?              @db.Uuid
+  frp_id               String?              @db.Uuid
+  recycler_processes   recycler_processes[]
+  frp                  frp?                 @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                users?               @relation(fields: [recycler_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  treatment_processes  treatment_processes? @relation(fields: [treatment_process_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
