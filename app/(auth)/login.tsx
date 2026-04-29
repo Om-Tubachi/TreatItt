@@ -1,4 +1,3 @@
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -11,7 +10,6 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "../../context/auth";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -20,121 +18,45 @@ export default function LoginScreen() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signInWithGoogle } = useAuth();
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
+      Alert.alert("Error", "Please fill in both fields");
       return;
     }
-
     setLoading(true);
     const { error } = await signIn(email, password);
     setLoading(false);
-
-    if (error) {
-      Alert.alert("Login Failed", error);
-    }
+    if (error) Alert.alert("Login Failed", error);
+    // no redirect — AuthGate handles it
   };
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
-    const { error } = await signInWithGoogle();
+    const { error, supabaseToken } = await signInWithGoogle();
     setGoogleLoading(false);
 
-    if (error && error !== 'Sign in cancelled') {
+    if (error) {
       Alert.alert("Google Login Failed", error);
+      return;
     }
-  };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 24,
-      justifyContent: "center",
-      backgroundColor: isDark ? "#151718" : "#fff",
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: "bold",
-      marginBottom: 32,
-      color: isDark ? "#ECEDEE" : "#11181C",
-      textAlign: "center",
-    },
-    input: {
-      height: 50,
-      borderWidth: 1,
-      borderColor: isDark ? "#3d3d3d" : "#ccc",
-      borderRadius: 8,
-      paddingHorizontal: 16,
-      marginBottom: 16,
-      fontSize: 16,
-      color: isDark ? "#ECEDEE" : "#11181C",
-      backgroundColor: isDark ? "#232530" : "#f9f9f9",
-    },
-    button: {
-      height: 50,
-      backgroundColor: "#0a7ea4",
-      borderRadius: 8,
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 8,
-    },
-    googleButton: {
-      flexDirection: "row",
-      height: 50,
-      backgroundColor: isDark ? "#232530" : "#fff",
-      borderWidth: 1,
-      borderColor: isDark ? "#3d3d3d" : "#ccc",
-      borderRadius: 8,
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 16,
-    },
-    buttonText: {
-      color: "#fff",
-      fontSize: 18,
-      fontWeight: "600",
-    },
-    googleButtonText: {
-      color: isDark ? "#ECEDEE" : "#11181C",
-      fontSize: 18,
-      fontWeight: "600",
-      marginLeft: 12,
-    },
-    separatorContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginVertical: 24,
-    },
-    line: {
-      flex: 1,
-      height: 1,
-      backgroundColor: isDark ? "#3d3d3d" : "#ccc",
-    },
-    separatorText: {
-      marginHorizontal: 10,
-      color: isDark ? "#9ba1a6" : "#687076",
-    },
-    linkButton: {
-      marginTop: 24,
-      alignItems: "center",
-    },
-    linkText: {
-      color: "#0a7ea4",
-      fontSize: 16,
-    },
-  });
+    if (supabaseToken) {
+      // user doesn't exist yet, carry token to signup
+      router.push({ pathname: "/(auth)/signup", params: { supabaseToken } });
+    }
+    // no token + no error = login succeeded, AuthGate redirects
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back</Text>
+      <Text style={styles.title}>FRP Recycle</Text>
+      <Text style={styles.subtitle}>Industrial Waste Management</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        placeholderTextColor={isDark ? "#9ba1a6" : "#687076"}
+        placeholder="Email address"
+        placeholderTextColor="#9ba1a6"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -144,11 +66,15 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        placeholderTextColor={isDark ? "#9ba1a6" : "#687076"}
+        placeholderTextColor="#9ba1a6"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
+
+      <TouchableOpacity style={styles.forgotPassword}>
+        <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.button}
@@ -158,11 +84,11 @@ export default function LoginScreen() {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Sign In</Text>
+          <Text style={styles.buttonText}>Sign In →</Text>
         )}
       </TouchableOpacity>
 
-      <View style={styles.separatorContainer}>
+      <View style={styles.separator}>
         <View style={styles.line} />
         <Text style={styles.separatorText}>OR</Text>
         <View style={styles.line} />
@@ -174,21 +100,114 @@ export default function LoginScreen() {
         disabled={loading || googleLoading}
       >
         {googleLoading ? (
-          <ActivityIndicator color={isDark ? "#fff" : "#000"} />
+          <ActivityIndicator color="#000" />
         ) : (
-          <>
-            <Ionicons name="logo-google" size={24} color={isDark ? "#ECEDEE" : "#11181C"} />
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
-          </>
+          <Text style={styles.googleButtonText}>Continue with Google</Text>
         )}
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.linkButton}
+        style={styles.signupLink}
         onPress={() => router.push("/(auth)/signup")}
       >
-        <Text style={styles.linkText}>Don't have an account? Sign up</Text>
+        <Text style={styles.signupText}>
+          Don't have an account? <Text style={styles.signupBold}>Sign Up</Text>
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 24,
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#11181C",
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#687076",
+    textAlign: "center",
+    marginBottom: 40,
+  },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    fontSize: 16,
+    color: "#11181C",
+    backgroundColor: "#f9f9f9",
+  },
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: 16,
+  },
+  forgotPasswordText: {
+    color: "#2ecc71",
+    fontSize: 14,
+  },
+  button: {
+    height: 50,
+    backgroundColor: "#2ecc71",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  separator: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 24,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#e0e0e0",
+  },
+  separatorText: {
+    marginHorizontal: 10,
+    color: "#687076",
+    fontSize: 13,
+  },
+  googleButton: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  googleButtonText: {
+    color: "#11181C",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  signupLink: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  signupText: {
+    color: "#687076",
+    fontSize: 14,
+  },
+  signupBold: {
+    color: "#2ecc71",
+    fontWeight: "600",
+  },
+});
