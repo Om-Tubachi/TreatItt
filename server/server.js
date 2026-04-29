@@ -1,4 +1,4 @@
-/* eslint-disable import/first */
+
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import dotenv from 'dotenv'
@@ -12,9 +12,12 @@ dotenv.config({
 const app = express()
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: [
+        'http://localhost:8081',
+        'http://192.168.183.235:8081' // Your Expo dev server IP
+    ],
     credentials: true
-}))
+}));
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -25,6 +28,6 @@ const PORT = process.env.PORT || 3000
 
 app.use('/api/v1', router)
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Listening on port ${PORT}\thttp://localhost:${PORT}`)
 })
