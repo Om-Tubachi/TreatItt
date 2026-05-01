@@ -14,6 +14,8 @@ api.interceptors.response.use(
   err => {
     if (err.response?.status === 401) {
       // call signout
+      console.log(`This will always be triggered for 4XX, code is: {err.response.status}`);
+      
     }
     return Promise.reject(err);
   }

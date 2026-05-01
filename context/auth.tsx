@@ -44,8 +44,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      console.log('coming here');
+
       const res = await api.post("/api/v1/users/auth/login", { email, password });
       setUser(res.data.data.user);
+      console.log('Returned from server');
+
       return { error: null };
     } catch (err: any) {
       return { error: err.response?.data?.message || "Login failed" };
