@@ -9,7 +9,11 @@ export default function ProductDetail() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Product Detail</Text>
-      <Text>FRP: {data?.frpId}</Text>
+      <Text>FRP constituents:</Text>
+      <Text>{data?.frp?.composition?.composition_name ?? 'N/A'}</Text>
+      <Text>{data?.frp?.category?.category_name ?? 'N/A'}</Text>
+      <Text>{data?.frp?.grade?.grade_name ?? 'N/A'}</Text>
+      <Text>{data?.frp?.resin?.resin_name ?? 'N/A'}</Text>
       <Text>Description: {data?.description ?? 'None'}</Text>
     </ScrollView>
   );

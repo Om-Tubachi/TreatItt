@@ -9,10 +9,11 @@ export default function WasteDetail() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Waste Detail</Text>
-      <Text>FRP: {data?.frpId}</Text>
+      <Text>FRP: {data?.frp?.composition?.composition_name ?? 'N/A'}</Text>
+      <Text>Process: {data?.manufacturing_processes?.manufacturing_process_name ?? 'N/A'}</Text>
+      <Text>Collector: {data?.collectors?.name ?? 'None'}</Text>
       <Text>Quantity: {data?.quantity}</Text>
-      <Text>Process: {data?.manufacturingProcessId}</Text>
-      <Text>Collector: {data?.collectorId ?? 'None'}</Text>
+      
     </ScrollView>
   );
 }

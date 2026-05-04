@@ -9,9 +9,14 @@ export default function RequirementDetail() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Requirement Detail</Text>
-      <Text>FRP: {data?.frpId}</Text>
-      <Text>Est / Month: {data?.estReqPerMonth}</Text>
-      <Text>Act / Month: {data?.actReqPerMonth ?? 'N/A'}</Text>
+
+      <Text>FRP: {data?.frp?.composition?.composition_name ?? 'N/A'}</Text>
+      <Text>Category: {data?.frp?.category?.category_name ?? 'N/A'}</Text>
+      <Text>Grade: {data?.frp?.grade?.grade_name ?? 'N/A'}</Text>
+
+      <Text>Est / Month: {data?.est_req_per_month} kg</Text>
+      <Text>Act / Month: {data?.act_req_per_month ?? 'N/A'} kg</Text>
+      <Text>Status: {data?.status}</Text>
     </ScrollView>
   );
 }
