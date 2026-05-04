@@ -34,8 +34,8 @@ export default function RequirementForm({ id }: { id?: string }) {
     if (!frpId || !estReqPerMonth) return;
     const body = {
       frpId,
-      estReqPerMonth: parseFloat(estReqPerMonth),
-      actReqPerMonth: actReqPerMonth ? parseFloat(actReqPerMonth) : undefined,
+      estReqPerMonth: estReqPerMonth.toString(),
+      actReqPerMonth: actReqPerMonth ? actReqPerMonth.toString() : undefined,
     };
     if (isEdit) {
       update({ id: id!, body }, { onSuccess: () => router.back() });
@@ -50,12 +50,22 @@ export default function RequirementForm({ id }: { id?: string }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{isEdit ? 'Edit Requirement' : 'Log Requirement'}</Text>
 
-      <FormPicker
+      {/* <FormPicker
         label="FRP Type"
         required
         selectedValue={frpId}
         onValueChange={setFrpId}
         options={frpList.map((f: any) => ({ label: f.name, value: f.id }))}
+      /> */}
+      <FormPicker
+        label="FRP Type"
+        required
+        selectedValue={frpId}
+        onValueChange={setFrpId}
+        options={frpList.map((f: any) => ({
+          label: `${f.composition?.composition_name || 'N/A'} | ${f.category?.category_name || 'N/A'} | ${f.grade?.grade_name || 'N/A'} | ${f.resin?.resin_name || 'N/A'}`,
+          value: f.id
+        }))}
       />
       <FormInput label="Estimated Req / Month (kg)" required value={estReqPerMonth} onChangeText={setEst} keyboardType="decimal-pad" placeholder="0" />
       <FormInput label="Actual Req / Month (kg)" value={actReqPerMonth} onChangeText={setAct} keyboardType="decimal-pad" placeholder="Optional" />

@@ -49,7 +49,10 @@ export default function ProductForm({ id }: { id?: string }) {
         required
         selectedValue={frpId}
         onValueChange={setFrpId}
-        options={frpList.map((f: any) => ({ label: f.name, value: f.id }))}
+        options={frpList.map((f: any) => ({
+          label: `${f.composition?.composition_name || 'N/A'} | ${f.category?.category_name || 'N/A'} | ${f.grade?.grade_name || 'N/A'} | ${f.resin?.resin_name || 'N/A'}`,
+          value: f.id
+        }))}
       />
       <FormInput label="Description" value={description} onChangeText={setDescription} placeholder="Optional" multiline numberOfLines={4} />
 

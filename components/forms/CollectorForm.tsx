@@ -43,7 +43,7 @@ export default function CollectorForm({ id }: { id?: string }) {
 
   const handleSubmit = () => {
     if (!address.trim() || !latitude || !longitude) return;
-    const body = { address, latitude: parseFloat(latitude), longitude: parseFloat(longitude) };
+    const body = { address, latitude: latitude.toString(), longitude: longitude.toString() };
     if (isEdit) {
       update({ id: id!, body }, { onSuccess: () => router.back() });
     } else {
