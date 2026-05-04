@@ -7,8 +7,8 @@ class RequirementsService {
     }
 
     async create(req) {
+        const userId = req?.user?.id
         const {
-            userId,
             frpId,
             estReqPerMonth,
             actReqPerMonth,
@@ -53,7 +53,26 @@ class RequirementsService {
             throw new ApiError(400, "Requirement ID is required");
 
         const requirementEntry = await this.prisma.frp_requirements.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                frp: {
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
+                },
+                users: {
+                    select: {
+                        id: true,
+                        username: true,
+                        first_name: true,
+                        last_name: true,
+                        company_name: true
+                    }
+                }
+            }
         });
 
         if (!requirementEntry)
@@ -64,20 +83,20 @@ class RequirementsService {
 
     // paginate this
     async getRequirementsByUser(req) {
-        const { userId } = req.params;
+        const { userId } = req?.params
 
         if (!userId)
             throw new ApiError(400, "User ID is required");
 
         const results = await this.prisma.$queryRaw`
             SELECT
-                EXISTS(SELECT 1 FROM "users"            WHERE id    = ${userId}::uuid) AS userInUsers,
-                EXISTS(SELECT 1 FROM "frp_requirements" WHERE u_id  = ${userId}::uuid) AS userInRequirements
+                EXISTS(SELECT 1 FROM "users"            WHERE id    = ${userId}::uuid) AS user_in_users,
+                EXISTS(SELECT 1 FROM "frp_requirements" WHERE u_id  = ${userId}::uuid) AS user_in_requirements
         `;
 
-        const { userInUsers, userInRequirements } = results[0];
+        const { user_in_users, user_in_requirements } = results[0];
 
-        if (!userInUsers || !userInRequirements)
+        if (!user_in_users || !user_in_requirements)
             throw new ApiError(409, "Either user is not registered or has no requirement entries");
 
         // fetch entries — fill in
@@ -107,8 +126,8 @@ class RequirementsService {
 
         })
 
-        if (!userRequirements.length)
-            throw new ApiError(500, "failed to fetch user requirements");
+        // if (!userRequirements.length)
+        //     throw new ApiError(500, "failed to fetch user requirements");
 
         return userRequirements
 
@@ -140,7 +159,7 @@ class RequirementsService {
                 frp: {
                     include: {
                         category: true,
-                        compostion: true,
+                        composition: true,
                         grade: true,
                         resin: true
                     }
@@ -164,7 +183,7 @@ class RequirementsService {
 
         return requirements;
     }
-    
+
     async getRequirementFilters(req) {
         const {
             status,

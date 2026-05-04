@@ -37,7 +37,18 @@ class ProductService {
     }
 
     async getAllProducts(req) {
-        const products = await this.prisma.products.findMany()
+        const products = await this.prisma.products.findMany({
+            include: {
+                frp: {
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
+                }
+            }
+        })
 
         if (!products.length)
             throw new ApiError(500, "Something went wrong while fetching products");
@@ -52,7 +63,17 @@ class ProductService {
             throw new ApiError(400, "Product ID is required");
 
         const product = await this.prisma.products.findUnique({
-            where: { id: productId }
+            where: { id: productId },
+            include: {
+                frp: {
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
+                }
+            }
         })
 
         if (!product)
@@ -68,7 +89,17 @@ class ProductService {
             throw new ApiError(400, "User ID is required");
 
         const products = await this.prisma.products.findMany({
-            where: { u_id: userId }
+            where: { u_id: userId },
+            include: {
+                frp: {
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
+                }
+            }
         })
 
         if (!products.length)

@@ -17,7 +17,8 @@ class CollectorService {
         `;
 
         const { user_exists, already_registered } = result[0];
-
+        console.log(user_exists, already_registered);
+        
         if (!user_exists) throw new ApiError(404, "User not found");
         if (already_registered) throw new ApiError(409, "User is already registered as a collector");
 

@@ -17,6 +17,7 @@ class WasteService {
             quantity,
             date
         } = req.body
+        
 
         if ([userId, frpId, manufacturingProcessId].some(f => !f) || !quantity) {
             throw new ApiError(409, "Missing required fields")
@@ -55,13 +56,27 @@ class WasteService {
     }
 
     async getWasteById(req) {
-        const { id } = req.params
+        const { wasteId: id } = req.params
+        console.log(req.params);
+
 
         if (!id)
             throw new ApiError(400, "Waste entry ID is required")
 
         const wasteEntry = await this.prisma.frp_wastes.findUnique({
-            where: { id: id }
+            where: { id },
+            include: {
+                frp: {
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
+                },
+                manufacturing_processes: true,
+                collectors: true
+            }
         })
 
         if (!wasteEntry)
@@ -88,9 +103,21 @@ class WasteService {
             throw new ApiError(409, "Either user is not registered on the platform or user has no waste entries")
 
 
-        const wasteEntries = await this.prisma.$queryRaw`
-            select * from "frp_wastes" where u_id = ${userId}
-        `
+        const wasteEntries = await this.prisma.frp_wastes.findMany({
+            where: { u_id: userId },
+            include: {
+                frp: {
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
+                },
+                manufacturing_processes: true,
+                collectors: true
+            }
+        });
 
         /**
          * 
@@ -108,7 +135,15 @@ class WasteService {
 
     // paginate this
     async getAllWasteEntries(req) {
-        const wasteEntries = await this.prisma.frp_wastes.findMany()
+        const wasteEntries = await this.prisma.frp_wastes.findMany({
+            include: {
+                frp: {
+                    include: { composition: true, category: true, grade: true, resin: true }
+                },
+                manufacturing_processes: true,
+                collectors: true
+            }
+        })
 
         if (!wasteEntries.length)
             throw new ApiError(500, "Something went wrong while fetching waste entries")
@@ -133,9 +168,16 @@ class WasteService {
         if (!frp_exists || !frp_in_wastes)
             throw new ApiError(409, "Either frp does not exist or has no waste entries")
 
-        const wasteEntries = await this.prisma.$queryRaw`
-        select * from "frp_wastes" where frp_id = ${frpId}::uuid
-    `
+        const wasteEntries = await this.prisma.frp_wastes.findMany({
+            where: { frp_id: frpId },
+            include: {
+                frp: {
+                    include: { composition: true, category: true, grade: true, resin: true }
+                },
+                manufacturing_processes: true,
+                collectors: true
+            }
+        });
 
         if (!wasteEntries.length)
             throw new ApiError(500, "Something went wrong while fetching waste entries")
