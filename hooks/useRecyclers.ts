@@ -1,8 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteRecycler, getRecyclerById, registerRecycler, updateRecycler } from '../services/recyclers';
+import { getAllRecyclers, getFilteredRecyclers, getRecyclerById, registerRecycler, updateRecycler } from '../services/recyclers';
+
+export const useAllRecyclers = (options = {}) =>
+  useQuery({ queryKey: ['recyclers'], queryFn: getAllRecyclers, ...options });
 
 export const useRecyclerById = (id: string, options = {}) =>
   useQuery({ queryKey: ['recyclers', id], queryFn: () => getRecyclerById(id), ...options });
+
+export const useFilteredRecyclers = (params: Record<string, string>, options = {}) =>
+  useQuery({ queryKey: ['recyclers', 'filtered', params], queryFn: () => getFilteredRecyclers(params), ...options });
 
 export const useRegisterRecycler = () => {
   const qc = useQueryClient();
@@ -18,9 +24,4 @@ export const useUpdateRecycler = () => {
       qc.invalidateQueries({ queryKey: ['recyclers', id] });
     },
   });
-};
-
-export const useDeleteRecycler = () => {
-  const qc = useQueryClient();
-  return useMutation({ mutationFn: (id: string) => deleteRecycler(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['recyclers'] }) });
 };

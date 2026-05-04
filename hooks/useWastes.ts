@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteWaste, getWasteById, updateWaste, uploadWaste } from '../services/wastes';
+import { deleteWaste, getAllWasteListings, getWasteById, getWasteByUser, updateWaste, uploadWaste } from '../services/wastes';
 
 export const useWasteById = (id: string, options = {}) =>
   useQuery({ queryKey: ['wastes', id], queryFn: () => getWasteById(id), ...options });
@@ -23,4 +23,19 @@ export const useUpdateWaste = () => {
 export const useDeleteWaste = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (id: string) => deleteWaste(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['wastes'] }) });
+};
+
+export const useWasteEntriesOfUser = (userId: string, options = {}) =>
+  useQuery({
+    queryKey: ['wastes', 'user', userId],
+    queryFn: () => getWasteByUser(userId),
+    ...options
+  });
+
+export const useAllWaste = (options = {}) => {
+  return useQuery({
+    queryKey: ['waste', 'all'],
+    queryFn: () => getAllWasteListings(),
+    ...options,
+  });
 };

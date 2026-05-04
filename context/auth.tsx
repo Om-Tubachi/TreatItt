@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/api/v1/users/auth/me")
+    api.get("/users/auth/me")
       .then((res) => setUser(res.data.data))
       .catch(() => setUser(null))
       .finally(() => setIsLoading(false));
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       console.log('coming here');
 
-      const res = await api.post("/api/v1/users/auth/login", { email, password });
+      const res = await api.post("/users/auth/login", { email, password });
       setUser(res.data.data.user);
       console.log('Returned from server');
 
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (data: SignUpData) => {
     try {
       setIsLoading(true);
-      await api.post("/api/v1/auth/signup", data);
+      await api.post("/auth/signup", data);
       return { error: null };
     } catch (err: any) {
       return { error: err.response?.data?.message || "Signup failed" };
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           // try login first — user might already exist
           try {
-            const res = await api.post("/api/v1/auth/login/google", {
+            const res = await api.post("/auth/login/google", {
               supabaseAccessToken: supabaseToken,
             });
             setUser(res.data.data.user);
@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUpWithGoogle = async (data: GoogleSignUpData) => {
     try {
       setIsLoading(true);
-      const res = await api.post("/api/v1/auth/signup/google", data);
+      const res = await api.post("/auth/signup/google", data);
       setUser(res.data.data);
       return { error: null };
     } catch (err: any) {
@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setIsLoading(true);
-      await api.post("/api/v1/auth/logout");
+      await api.post("/auth/logout");
     } catch (_) {
       // even if server call fails, clear local state
     } finally {
