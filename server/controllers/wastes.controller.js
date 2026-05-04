@@ -5,6 +5,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const uploadWaste = asyncHandler(
     async (req, res) => {
+        console.log('in create controller');
+        
         const wasteEntry = await wasteService.create(req);
         res
             .status(201)

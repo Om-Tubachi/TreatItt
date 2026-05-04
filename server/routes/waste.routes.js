@@ -13,6 +13,7 @@ import { verifyJWT } from '../middlewares/auth.middleware.js';
 import { verifyWasteProducer } from '../middlewares/wasteProducer.middleware.js';
 const router = Router();
 
+console.log('hitting in waste router');
 
 router
     .route('/user/:userId')
