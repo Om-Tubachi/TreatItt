@@ -1,23 +1,27 @@
-// import 'react-native-url-polyfill/auto'
-// import { createClient } from '@supabase/supabase-js'
-// import AsyncStorage from '@react-native-async-storage/async-storage'
-// import { Platform } from 'react-native'
+// Source - https://stackoverflow.com/a/67338623
+// Posted by jonnyg23
+// Retrieved 2026-05-05, License - CC BY-SA 4.0
 
-// const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-// const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
+import 'react-native-url-polyfill/auto';
 
-// // Debug logs
-// if (Platform.OS !== 'web') {
-//   console.log('Supabase URL:', supabaseUrl);
-//   console.log('Supabase Key:', supabaseAnonKey ? 'provided' : 'missing');
-// }
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 
-// export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-//   auth: {
-//     // Only use AsyncStorage on mobile platforms to avoid SSR errors
-//     storage: Platform.OS !== 'web' ? AsyncStorage : undefined,
-//     autoRefreshToken: true,
-//     persistSession: true,
-//     detectSessionInUrl: false,
-//   },
-// })
+// Debug logs
+if (Platform.OS !== 'web') {
+  console.log('Supabase URL:', supabaseUrl);
+  console.log('Supabase Key:', supabaseAnonKey ? 'provided' : 'missing');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Only use AsyncStorage on mobile platforms to avoid SSR errors
+    storage: Platform.OS !== 'web' ? AsyncStorage : undefined,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+})
