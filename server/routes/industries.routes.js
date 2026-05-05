@@ -28,9 +28,14 @@ const getIndustryById = asyncHandler(
         );
     }
 )
+const getAllIndustries = asyncHandler(async (req, res) => {
+    const industries = await prisma.industries.findMany();
+    return res.status(200).json(new ApiResponse(200, industries, "Industries fetched"));
+});
 
-router
-    .route('/')
-    .get(getIndustryById)
+router.route('/').get((req, res, next) => {
+    if (req.query.industryId) return getIndustryById(req, res, next);
+    return getAllIndustries(req, res, next);
+});
 
 export default router

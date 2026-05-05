@@ -27,6 +27,14 @@ app.use(cookieParser())
 const PORT = process.env.PORT || 3000
 
 app.use('/api/v1', router)
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    
+    res.status(statusCode).json({
+        success: false,
+        message: err.message || "Internal Server Error"
+    });
+});
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Listening on port ${PORT}\thttp://localhost:${PORT}`)
