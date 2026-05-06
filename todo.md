@@ -1,29 +1,5 @@
-# Steps to get on speed
-
----
-
-1. Understand how expo works:
-
-        - What is expo
-        - What is react native
-        - Some basic things i ought to know
-
-
-
-        ### `to attain` speed writing code:
-        -> How routing works in expo
-        -> best practices for code organisation as in:
-
-            - How are these things written:
-                1. contexts
-                2. hooks
-                3. UI comps
-
-        ### `to attain` lesser resistance implementing things
-        -> How to handle authentication in expo
-            
-            - Auth — SecureStore (not cookies, not localStorage)
-        
-        -> React query - Basics - to only cache queries
-
-
+1. oauth - google linkedin flow 
+2. edit delete resources
+3. send more meaningful data from db, use that in meaningful ways on the frontend
+        - showing information rich entities
+        - all information is interlinked
