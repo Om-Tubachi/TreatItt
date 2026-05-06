@@ -1,6 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScreenHeader } from '../../components/ui/ScreenHeader';
+import { SidebarNav } from '../../components/ui/SidebarNav';
+import { colors, radius, shadows, spacing, typography } from '../../constants/theme';
 import { useAuth } from '../../context/auth';
 import { useProductsByUser } from '../../hooks/useProducts';
 import { useRequirementsByUser } from '../../hooks/useRequirements';
@@ -11,92 +14,89 @@ type Category = 'products' | 'waste' | 'services' | 'requirements';
 const CATEGORIES: Category[] = ['products', 'waste', 'services', 'requirements'];
 
 function useUserData(category: Category, userId: string) {
-    const products = useProductsByUser(userId, { enabled: category === 'products' });
-    const waste = useWasteEntriesOfUser(userId, { enabled: category === 'waste' });
-    const services = useTreatmentsByRecycler(userId, { enabled: category === 'services' });
-    const requirements = useRequirementsByUser(userId, { enabled: category === 'requirements' });
-
-    const map: Record<Category, { data: any; isLoading: boolean; error: any }> = {
-        products, waste, services, requirements,
-    };
-    return map[category];
-}
-
-function getLabel(category: Category, item: any): string {
-    switch (category) {
-        case 'products':
-            return `${item.frp?.composition?.composition_name ?? 'N/A'} | ${item.frp?.category?.category_name ?? 'N/A'} | ${item.description ?? ''}`;
-        case 'waste':
-            return `${item.frp?.category?.category_name ?? 'N/A'} | qty: ${item.quantity ?? '—'} | ${item.status ?? '—'}`;
-        case 'services':
-            return `${item.treatment_processes?.process ?? 'N/A'} | ${item.treatment_processes?.treatment_methods?.method ?? '—'}`;
-        case 'requirements':
-            return `Est: ${item.est_req_per_month ?? '—'} kg/mo | ${item.status ?? '—'}`;
-    }
-}
-
-function getRoute(category: Category, item: any): string {
-    switch (category) {
-        case 'products': return `/product/${item.id}`;
-        case 'waste': return `/waste/${item.id}`;
-        case 'services': return `/treatment/${item.id}`;
-        case 'requirements': return `/requirement/${item.id}`;
-    }
+  const products = useProductsByUser(userId, { enabled: category === 'products' });
+  const waste = useWasteEntriesOfUser(userId, { enabled: category === 'waste' });
+  const services = useTreatmentsByRecycler(userId, { enabled: category === 'services' });
+  const requirements = useRequirementsByUser(userId, { enabled: category === 'requirements' });
+  const map: Record<Category, { data: any; isLoading: boolean; error: any }> = { products, waste, services, requirements };
+  return map[category];
 }
 
 export default function ResourcesScreen() {
-    const { user } = useAuth();
-    const [active, setActive] = useState<Category>('products');
-    const { data = [], isLoading, error } = useUserData(active, user?.id ?? '');
+  const { user } = useAuth();
+  const [active, setActive] = useState<Category>('products');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data = [], isLoading, error } = useUserData(active, user?.id ?? '');
 
-    return (
-        <View style={styles.container}>
-            {/* Left menu */}
-            <View style={styles.menu}>
-                {CATEGORIES.map(cat => (
-                    <TouchableOpacity
-                        key={cat}
-                        style={[styles.menuItem, active === cat && styles.menuItemActive]}
-                        onPress={() => setActive(cat)}
-                    >
-                        <Text style={[styles.menuText, active === cat && styles.menuTextActive]}>{cat}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+  const handleNavChange = (cat: Category) => {
+    setActive(cat);
+    setIsMenuOpen(false);
+  };
 
-            {/* Right panel */}
-            <View style={styles.panel}>
-                <Text style={styles.panelHeader}>{active}</Text>
-                {isLoading && <ActivityIndicator style={{ marginTop: 20 }} />}
-                {!!error && <Text style={styles.error}>{error.message}</Text>}
-                {!isLoading && !error && (
-                    <FlatList
-                        data={data}
-                        keyExtractor={item => item.id}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity style={styles.listItem} onPress={() => router.push(getRoute(active, item) as any)}>
-                                <Text style={styles.listText}>{getLabel(active, item)}</Text>
-                            </TouchableOpacity>
-                        )}
-                        ListEmptyComponent={<Text style={styles.empty}>No entries found.</Text>}
-                    />
-                )}
+  return (
+    <View style={styles.screen}>
+      <ScreenHeader title="Resources" showBack />
+      
+      {/* Trigger for Mobile */}
+      <TouchableOpacity onPress={() => setIsMenuOpen(!isMenuOpen)} style={styles.hamburger}>
+         <Text>☰ Menu</Text>
+      </TouchableOpacity>
+
+      <View style={styles.body}>
+        {isMenuOpen && (
+          <>
+            <TouchableOpacity style={styles.backdrop} onPress={() => setIsMenuOpen(false)} />
+            <View style={styles.sidebarDrawer}>
+              <SidebarNav tabs={CATEGORIES} active={active} onChange={handleNavChange} />
             </View>
+          </>
+        )}
+
+        <View style={styles.panel}>
+          {isLoading && <ActivityIndicator style={{ marginTop: 40 }} color={colors.primary} />}
+          {!!error && <Text style={styles.error}>{error.message}</Text>}
+          {!isLoading && !error && (
+            <FlatList
+              data={data}
+              keyExtractor={item => item.id}
+              contentContainerStyle={styles.list}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.card, shadows.card]}
+                  onPress={() => router.push(getRoute(active, item) as any)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={styles.cardTitle} numberOfLines={2}>{getLabel(active, item)}</Text>
+                  <Text style={styles.cardSub}>{getSub(active, item)}</Text>
+                  <Text style={styles.chevron}>›</Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
         </View>
-    );
+      </View>
+    </View>
+  );
 }
 
+// Helpers
+function getLabel(c: Category, i: any): string {
+    return c === 'products' ? `${i.frp?.composition?.composition_name ?? 'N/A'} | ${i.frp?.category?.category_name ?? 'N/A'}` : 'Item';
+}
+function getSub(c: Category, i: any): string { return ''; }
+function getRoute(c: Category, i: any): string { return `/${c}/${i.id}`; }
+
 const styles = StyleSheet.create({
-    container: { flex: 1, flexDirection: 'row' },
-    menu: { width: 110, borderRightWidth: 1, borderColor: '#ccc', padding: 8, gap: 8 },
-    menuItem: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, paddingVertical: 10, paddingHorizontal: 6 },
-    menuItemActive: { backgroundColor: '#000' },
-    menuText: { fontSize: 12, textAlign: 'center' },
-    menuTextActive: { color: '#fff' },
-    panel: { flex: 1, padding: 12, gap: 8 },
-    panelHeader: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
-    listItem: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 8 },
-    listText: { fontSize: 13 },
-    error: { color: 'red', fontSize: 13 },
-    empty: { color: '#999', fontSize: 13, marginTop: 20, textAlign: 'center' },
+  screen: { flex: 1, backgroundColor: colors.background },
+  hamburger: { padding: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.border },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 10 },
+  sidebarDrawer: { position: 'absolute', top: 0, left: 0, bottom: 0, width: '70%', backgroundColor: colors.background, zIndex: 20, padding: spacing[4], borderRightWidth: 1, borderRightColor: colors.border },
+  body: { flex: 1, flexDirection: 'row' },
+  panel: { flex: 1, paddingTop: spacing[2] },
+  list: { padding: spacing[3], gap: spacing[2] },
+  card: { backgroundColor: colors.card, borderRadius: radius.xl, padding: spacing.cardPadding, marginBottom: spacing[2] },
+  cardTitle: { fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semiBold, color: colors.foreground, paddingRight: spacing[6] },
+  cardSub: { fontSize: typography.fontSize.sm, color: colors.mutedForeground, marginTop: spacing[1] },
+  chevron: { position: 'absolute', right: spacing[4], top: spacing[4], fontSize: 20, color: colors.mutedForeground },
+  error: { color: colors.destructive, padding: spacing[4] },
 });
