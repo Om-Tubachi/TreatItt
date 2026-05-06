@@ -3,12 +3,15 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { FormInput } from "../../components/ui/FormInput";
+import { SubmitButton } from "../../components/ui/SubmitButton";
+import { colors, radius, shadows, spacing, typography } from "../../constants/theme";
 import { useAuth } from "../../context/auth";
 
 export default function LoginScreen() {
@@ -20,194 +23,162 @@ export default function LoginScreen() {
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in b  oth fields");
-      return;
-    }
+    if (!email || !password) { Alert.alert("Error", "Please fill in both fields"); return; }
     setLoading(true);
     const { error } = await signIn(email, password);
     setLoading(false);
     if (error) Alert.alert("Login Failed", error);
-    // no redirect — AuthGate handles it
   };
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     const { error, supabaseToken } = await signInWithGoogle();
     setGoogleLoading(false);
-
-    if (error) {
-      Alert.alert("Google Login Failed", error);
-      return;
-    }
-
-    if (supabaseToken) {
-      // user doesn't exist yet, carry token to signup
-      router.push({ pathname: "/(auth)/signup", params: { supabaseToken } });
-    }
-    // no token + no error = login succeeded, AuthGate redirects
+    if (error) { Alert.alert("Google Login Failed", error); return; }
+    if (supabaseToken) router.push({ pathname: "/(auth)/signup", params: { supabaseToken } });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>FRP Recycle</Text>
-      <Text style={styles.subtitle}>Industrial Waste Management</Text>
+    <ScrollView contentContainerStyle={styles.screen} keyboardShouldPersistTaps="handled">
+      {/* Top branding area */}
+      <View style={styles.brandingArea}>
+        <View style={styles.logoMark}>
+          <Text style={styles.logoIcon}>♻</Text>
+        </View>
+        <Text style={styles.appName}>FRP Recycle</Text>
+        <Text style={styles.appSub}>Industrial Waste Management</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email address"
-        placeholderTextColor="#9ba1a6"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#9ba1a6"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <TouchableOpacity style={styles.forgotPassword}>
-        <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={loading || googleLoading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Sign In →</Text>
-        )}
-      </TouchableOpacity>
-
-      <View style={styles.separator}>
-        <View style={styles.line} />
-        <Text style={styles.separatorText}>OR</Text>
-        <View style={styles.line} />
+        {/* Geometric decoration */}
+        <View style={styles.decoration}>
+          <View style={[styles.decCircle, styles.dec1]} />
+          <View style={[styles.decCircle, styles.dec2]} />
+          <View style={[styles.decCircle, styles.dec3]} />
+        </View>
       </View>
 
-      <TouchableOpacity
-        style={styles.googleButton}
-        onPress={handleGoogleLogin}
-        disabled={loading || googleLoading}
-      >
-        {googleLoading ? (
-          <ActivityIndicator color="#000" />
-        ) : (
-          <Text style={styles.googleButtonText}>Continue with Google</Text>
-        )}
-      </TouchableOpacity>
+      {/* Form area */}
+      <View style={styles.formArea}>
+        <FormInput
+          placeholder="Email address"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <FormInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <TouchableOpacity
-        style={styles.signupLink}
-        onPress={() => router.push("/(auth)/signup")}
-      >
-        <Text style={styles.signupText}>
-          Don't have an account? <Text style={styles.signupBold}>Sign Up</Text>
-        </Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.forgot}>
+          <Text style={styles.forgotText}>Forgot password?</Text>
+        </TouchableOpacity>
+
+        <SubmitButton
+          label="Sign In →"
+          loading={loading}
+          onPress={handleLogin}
+          disabled={loading || googleLoading}
+        />
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.googleBtn, shadows.card]}
+          onPress={handleGoogleLogin}
+          disabled={loading || googleLoading}
+          activeOpacity={0.8}
+        >
+          {googleLoading
+            ? <ActivityIndicator color={colors.foreground} />
+            : <Text style={styles.googleText}>Continue with Google</Text>
+          }
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.signupRow} onPress={() => router.push("/(auth)/signup")}>
+          <Text style={styles.signupText}>
+            Don't have an account?{" "}
+            <Text style={styles.signupLink}>Sign Up</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: "center",
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#11181C",
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#687076",
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    fontSize: 16,
-    color: "#11181C",
-    backgroundColor: "#f9f9f9",
-  },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginBottom: 16,
-  },
-  forgotPasswordText: {
-    color: "#2ecc71",
-    fontSize: 14,
-  },
-  button: {
-    height: 50,
-    backgroundColor: "#2ecc71",
-    borderRadius: 10,
-    justifyContent: "center",
+  screen: { flexGrow: 1, backgroundColor: colors.background },
+
+  // Branding
+  brandingArea: {
+    backgroundColor: colors.surfaceDark,
     alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    paddingBottom: 48,
+    overflow: "hidden",
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+  logoMark: {
+    width: 64, height: 64,
+    borderRadius: radius.xl,
+    backgroundColor: colors.primary,
+    alignItems: "center", justifyContent: "center",
+    marginBottom: spacing[4],
+    ...shadows.cardMd,
   },
-  separator: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
+  logoIcon: { fontSize: 32, color: colors.white },
+  appName: {
+    fontSize: typography.fontSize["3xl"],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.surfaceDarkForeground,
+    letterSpacing: 0.5,
   },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e0e0e0",
+  appSub: {
+    fontSize: typography.fontSize.sm,
+    color: "rgba(255,255,255,0.5)",
+    marginTop: spacing[1],
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
-  separatorText: {
-    marginHorizontal: 10,
-    color: "#687076",
-    fontSize: 13,
+  decoration: { position: "absolute", width: "100%", height: "100%" },
+  decCircle: { position: "absolute", borderRadius: 999, opacity: 0.06, backgroundColor: colors.primary },
+  dec1: { width: 200, height: 200, top: -60, right: -60 },
+  dec2: { width: 140, height: 140, bottom: -20, left: -40 },
+  dec3: { width: 80, height: 80, top: 20, left: 40 },
+
+  // Form
+  formArea: {
+    padding: spacing.screenPadding,
+    gap: spacing[4],
+    paddingTop: spacing[6],
+    paddingBottom: 48,
   },
-  googleButton: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 10,
+  forgot: { alignSelf: "flex-end", marginTop: -spacing[2] },
+  forgotText: { fontSize: typography.fontSize.sm, color: colors.primary },
+  divider: { flexDirection: "row", alignItems: "center", gap: spacing[3] },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerText: { fontSize: typography.fontSize.sm, color: colors.mutedForeground },
+  googleBtn: {
+    height: 52,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: radius.xl,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.card,
   },
-  googleButtonText: {
-    color: "#11181C",
-    fontSize: 16,
-    fontWeight: "500",
+  googleText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.foreground,
   },
-  signupLink: {
-    marginTop: 24,
-    alignItems: "center",
-  },
-  signupText: {
-    color: "#687076",
-    fontSize: 14,
-  },
-  signupBold: {
-    color: "#2ecc71",
-    fontWeight: "600",
-  },
+  signupRow: { alignItems: "center", marginTop: spacing[2] },
+  signupText: { fontSize: typography.fontSize.sm, color: colors.mutedForeground },
+  signupLink: { color: colors.primary, fontWeight: typography.fontWeight.semiBold },
 });
