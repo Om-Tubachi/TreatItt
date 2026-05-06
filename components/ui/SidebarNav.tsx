@@ -32,22 +32,20 @@ export function SidebarNav<T extends string>({ tabs, active, onChange }: Sidebar
 
 const styles = StyleSheet.create({
   sidebar: {
-    width: 100,
     backgroundColor: colors.background,
     borderRightWidth: 1,
     borderRightColor: colors.border,
     paddingTop: spacing[2],
   },
   item: {
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[3],
-    marginBottom: spacing[1],
+    paddingVertical: spacing[2], // Reduced
+    paddingHorizontal: spacing[1], // Reduced
+    marginHorizontal: spacing[1], // Uniform margin
     position: 'relative',
   },
   itemActive: {
     backgroundColor: colors.accent,
     borderRadius: radius.md,
-    marginHorizontal: spacing[1],
   },
   label: {
     fontSize: typography.fontSize.sm,

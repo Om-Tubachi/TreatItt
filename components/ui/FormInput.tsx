@@ -1,34 +1,51 @@
+import React from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
+import { colors, componentTokens, spacing, typography } from '../../constants/theme';
 
-interface Props extends TextInputProps {
-  label: string;
+interface FormInputProps extends TextInputProps {
+  label?: string;
   required?: boolean;
+  optional?: boolean;
 }
 
-export default function FormInput({ label, required, ...props }: Props) {
+export function FormInput({ label, required, optional, ...props }: FormInputProps) {
   return (
-    <View style={styles.wrap}>
-      <Text style={styles.label}>{label}{required && ' *'}</Text>
-      <TextInput 
-        style={styles.input} 
-        placeholderTextColor="#999" 
-        {...props} 
+    <View style={styles.wrapper}>
+      {label ? (
+        <Text style={styles.label}>
+          {label}
+          {required ? <Text style={styles.required}> *</Text> : null}
+          {optional ? <Text style={styles.optionalTag}> (optional)</Text> : null}
+        </Text>
+      ) : null}
+      <TextInput
+        style={styles.input}
+        placeholderTextColor={colors.mutedForeground}
+        {...props}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 4 },
-  label: { fontSize: 13, color: '#333' },
+  wrapper: { gap: spacing[1] },
+  label: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.mutedForeground,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  required: { color: colors.destructive },
+  optionalTag: {
+    color: colors.mutedForeground,
+    fontWeight: typography.fontWeight.regular,
+    textTransform: 'none',
+    letterSpacing: 0,
+    fontSize: typography.fontSize.xs,
+  },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-    minHeight: 48,
-    backgroundColor: '#fff', // Added background for visibility
-    color: '#000', // Added text color
+    ...componentTokens.input,
+    fontFamily: 'System',
   },
 });

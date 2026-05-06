@@ -2,8 +2,8 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text } from 'react-native';
 import { useRecyclerById, useRegisterRecycler, useUpdateRecycler } from '../../hooks/useRecyclers';
-import FormInput from '../ui/FormInput';
-import SubmitButton from '../ui/SubmitButton';
+import { FormInput } from '../ui/FormInput';
+import { SubmitButton } from '../ui/SubmitButton';
 
 export default function RecyclerForm({ id }: { id?: string }) {
   const isEdit = !!id;

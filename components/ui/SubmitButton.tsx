@@ -1,27 +1,47 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import { colors, radius, typography } from '../../constants/theme';
 
-interface Props {
+interface SubmitButtonProps extends TouchableOpacityProps {
   label: string;
-  onPress: () => void;
-  isPending: boolean;
+  loading?: boolean;
+  variant?: 'primary' | 'outline';
 }
 
-export default function SubmitButton({ label, onPress, isPending }: Props) {
+export function SubmitButton({ label, loading, variant = 'primary', style, ...props }: SubmitButtonProps) {
+  const isPrimary = variant === 'primary';
   return (
-    <TouchableOpacity style={[styles.btn, isPending && styles.disabled]} onPress={onPress} disabled={isPending}>
-      {isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.text}>{label}</Text>}
+    <TouchableOpacity
+      style={[styles.btn, isPrimary ? styles.primary : styles.outline, style]}
+      activeOpacity={0.85}
+      disabled={loading}
+      {...props}
+    >
+      {loading
+        ? <ActivityIndicator color={isPrimary ? colors.primaryForeground : colors.primary} />
+        : <Text style={[styles.label, !isPrimary && styles.labelOutline]}>{label}</Text>
+      }
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   btn: {
-    backgroundColor: '#000',
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: radius.xl,
+    paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 16,
+    justifyContent: 'center',
   },
-  disabled: { opacity: 0.5 },
-  text: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  primary: { backgroundColor: colors.primary },
+  outline: {
+    backgroundColor: colors.transparent,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  label: {
+    color: colors.primaryForeground,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semiBold,
+  },
+  labelOutline: { color: colors.primary },
 });

@@ -1,13 +1,20 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { colors, spacing } from '../../constants/theme';
+import { FormInput } from '../ui/FormInput';
+import { FormPicker } from '../ui/FormPicker';
+import { ScreenHeader } from '../ui/ScreenHeader';
+import { SubmitButton } from '../ui/SubmitButton';
+
 import { useFrp } from '../../hooks/useFrp';
 import { useCreateRequirement, useRequirementById, useUpdateRequirement } from '../../hooks/useRequirements';
-import FormInput from '../ui/FormInput';
-import FormPicker from '../ui/FormPicker';
-import SubmitButton from '../ui/SubmitButton';
 
-export default function RequirementForm({ id }: { id?: string }) {
+interface RequirementFormProps {
+  id?: string;
+}
+
+export default function RequirementForm({ id }: RequirementFormProps) {
   const isEdit = !!id;
 
   const { data: frpList = [] } = useFrp();
@@ -16,27 +23,29 @@ export default function RequirementForm({ id }: { id?: string }) {
   const { mutate: update, isPending: updating, error: updateError } = useUpdateRequirement();
 
   const [frpId, setFrpId] = useState('');
-  const [estReqPerMonth, setEst] = useState('');
-  const [actReqPerMonth, setAct] = useState('');
-
-  useEffect(() => {
-    if (data) {
-      setFrpId(data.frpId ?? '');
-      setEst(String(data.estReqPerMonth ?? ''));
-      setAct(String(data.actReqPerMonth ?? ''));
-    }
-  }, [data]);
+  const [estReqPerMonth, setEstReqPerMonth] = useState('');
+  const [actReqPerMonth, setActReqPerMonth] = useState('');
 
   const error = createError || updateError;
   const isPending = creating || updating;
 
+  useEffect(() => {
+    if (data) {
+      setFrpId(data.frpId ?? '');
+      setEstReqPerMonth(String(data.estReqPerMonth ?? ''));
+      setActReqPerMonth(String(data.actReqPerMonth ?? ''));
+    }
+  }, [data]);
+
   const handleSubmit = () => {
     if (!frpId || !estReqPerMonth) return;
+    
     const body = {
       frpId,
       estReqPerMonth: estReqPerMonth.toString(),
       actReqPerMonth: actReqPerMonth ? actReqPerMonth.toString() : undefined,
     };
+
     if (isEdit) {
       update({ id: id!, body }, { onSuccess: () => router.back() });
     } else {
@@ -44,41 +53,69 @@ export default function RequirementForm({ id }: { id?: string }) {
     }
   };
 
-  if (isEdit && isLoading) return <ActivityIndicator style={styles.centered} />;
+  if (isEdit && isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{isEdit ? 'Edit Requirement' : 'Log Requirement'}</Text>
-
-      {/* <FormPicker
-        label="FRP Type"
-        required
-        selectedValue={frpId}
-        onValueChange={setFrpId}
-        options={frpList.map((f: any) => ({ label: f.name, value: f.id }))}
-      /> */}
-      <FormPicker
-        label="FRP Type"
-        required
-        selectedValue={frpId}
-        onValueChange={setFrpId}
-        options={frpList.map((f: any) => ({
-          label: `${f.composition?.composition_name || 'N/A'} | ${f.category?.category_name || 'N/A'} | ${f.grade?.grade_name || 'N/A'} | ${f.resin?.resin_name || 'N/A'}`,
-          value: f.id
-        }))}
+    <View style={styles.screen}>
+      <ScreenHeader 
+        title={isEdit ? 'Edit Requirement' : 'Log Requirement'} 
+        showBack 
       />
-      <FormInput label="Estimated Req / Month (kg)" required value={estReqPerMonth} onChangeText={setEst} keyboardType="decimal-pad" placeholder="0" />
-      <FormInput label="Actual Req / Month (kg)" value={actReqPerMonth} onChangeText={setAct} keyboardType="decimal-pad" placeholder="Optional" />
+      
+      <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+        <FormPicker
+          label="FRP Type"
+          required
+          placeholder="Select FRP type"
+          value={frpId}
+          onChange={setFrpId}
+          options={frpList.map((f: any) => ({
+            label: `${f.composition?.composition_name || 'N/A'} | ${f.category?.category_name || 'N/A'} | ${f.grade?.grade_name || 'N/A'} | ${f.resin?.resin_name || 'N/A'}`,
+            value: f.id,
+          }))}
+        />
 
-      {error && <Text style={styles.error}>{error.message}</Text>}
-      <SubmitButton label={isEdit ? 'Save Changes' : 'Log Requirement'} onPress={handleSubmit} isPending={isPending} />
-    </ScrollView>
+        <FormInput
+          label="Estimated Req / Month (kg)"
+          required
+          placeholder="0"
+          keyboardType="decimal-pad"
+          value={estReqPerMonth}
+          onChangeText={setEstReqPerMonth}
+        />
+
+        <FormInput
+          label="Actual Req / Month (kg)"
+          optional
+          placeholder="Optional"
+          keyboardType="decimal-pad"
+          value={actReqPerMonth}
+          onChangeText={setActReqPerMonth}
+        />
+
+        {error && <Text style={styles.error}>{error.message}</Text>}
+
+        <SubmitButton
+          label={isEdit ? 'Save Changes' : 'Log Requirement'}
+          loading={isPending}
+          onPress={handleSubmit}
+          style={styles.submit}
+        />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, marginTop: 40 },
-  container: { padding: 16, gap: 12 },
-  title: { fontSize: 20, fontWeight: '600' },
-  error: { color: 'red', fontSize: 13 },
+  screen: { flex: 1, backgroundColor: colors.background },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  form: { padding: spacing.screenPadding, gap: spacing[5], paddingBottom: 60 },
+  submit: { marginTop: spacing[4] },
+  error: { color: colors.destructive || 'red', fontSize: 13, marginTop: -spacing[2] },
 });
