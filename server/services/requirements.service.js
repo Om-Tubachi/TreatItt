@@ -12,7 +12,11 @@ class RequirementsService {
             frpId,
             estReqPerMonth,
             actReqPerMonth,
-            date
+            date,
+            urgency,
+            pricePerKg,
+            latitude,
+            longitude
         } = req.body;
 
         if ([userId, frpId].some(f => !f) || !estReqPerMonth)
@@ -36,7 +40,11 @@ class RequirementsService {
                 est_req_per_month: estReqPerMonth,
                 act_req_per_month: actReqPerMonth ?? null,
                 date: date ?? null,
-                status: 'open'
+                status: 'open',
+                urgency: urgency ?? null,
+                price_per_kg: pricePerKg ?? null,
+                latitude: latitude ?? null,
+                longitude: longitude ?? null
             }
         });
 
@@ -81,7 +89,6 @@ class RequirementsService {
         return requirementEntry;
     }
 
-    // paginate this
     async getRequirementsByUser(req) {
         const { userId } = req?.params
 
@@ -98,8 +105,6 @@ class RequirementsService {
 
         if (!user_in_users || !user_in_requirements)
             throw new ApiError(409, "Either user is not registered or has no requirement entries");
-
-        // fetch entries — fill in
 
         const userRequirements = await this.prisma.frp_requirements.findMany({
             where: { u_id: userId },
@@ -119,21 +124,14 @@ class RequirementsService {
                         category: true,
                         grade: true,
                         resin: true
-
                     }
                 }
             }
-
         })
 
-        // if (!userRequirements.length)
-        //     throw new ApiError(500, "failed to fetch user requirements");
-
         return userRequirements
-
     }
 
-    // paginate this
     async getRequirementsByFrp(req) {
         const { frpId } = req.params;
 
@@ -142,7 +140,7 @@ class RequirementsService {
 
         const results = await this.prisma.$queryRaw`
             SELECT
-                EXISTS(SELECT 1 FROM "frp"              WHERE id     = ${frpId}::uuid) AS frpExists,
+                EXISTS(SELECT 1 FROM "frp"               WHERE id     = ${frpId}::uuid) AS frpExists,
                 EXISTS(SELECT 1 FROM "frp_requirements" WHERE frp_id = ${frpId}::uuid) AS frpInRequirements
         `;
 
@@ -163,7 +161,8 @@ class RequirementsService {
                         grade: true,
                         resin: true
                     }
-                }
+                },
+                users: { select: { id: true, username: true } }
             }
         })
 
@@ -171,12 +170,15 @@ class RequirementsService {
             throw new ApiError(500, "Failed to retrieve requirements quoted by user by frp");
 
         return frp
-
     }
 
-    // paginate this
     async getAllRequirements(req) {
-        const requirements = await this.prisma.frp_requirements.findMany();
+        const requirements = await this.prisma.frp_requirements.findMany({
+            include: {
+                frp: { include: { composition: true, category: true, grade: true, resin: true } },
+                users: { select: { id: true, username: true } }
+            }
+        });
 
         if (!requirements.length)
             throw new ApiError(404, "No requirement entries found");
@@ -207,6 +209,9 @@ class RequirementsService {
                     { status },
                     ...(idList.length ? [{ frp_id: { in: idList } }] : [])
                 ]
+            },
+            include: {
+                users: { select: { id: true, username: true } }
             }
         });
 
@@ -225,7 +230,17 @@ class RequirementsService {
 
         const updatedRequirement = await this.prisma.frp_requirements.update({
             where: { id: requirementId },
-            data: updateData
+            data: {
+                ...(updateData.frpId && { frp_id: updateData.frpId }),
+                ...(updateData.estReqPerMonth && { est_req_per_month: updateData.estReqPerMonth }),
+                ...(updateData.actReqPerMonth && { act_req_per_month: updateData.actReqPerMonth }),
+                ...(updateData.status && { status: updateData.status }),
+                ...(updateData.urgency && { urgency: updateData.urgency }),
+                ...(updateData.pricePerKg && { price_per_kg: updateData.pricePerKg }),
+                ...(updateData.latitude && { latitude: updateData.latitude }),
+                ...(updateData.longitude && { longitude: updateData.longitude }),
+                updatedat: new Date()
+            }
         });
 
         if (!updatedRequirement)

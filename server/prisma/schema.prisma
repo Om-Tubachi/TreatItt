@@ -157,6 +157,10 @@ model frp_requirements {
   createdat         DateTime? @default(now()) @db.Timestamp(6)
   updatedat         DateTime? @default(now()) @db.Timestamp(6)
   deletedat         DateTime? @db.Timestamp(6)
+  price_per_kg      Decimal?  @db.Decimal
+  urgency           String?   @db.VarChar
+  latitude          Decimal?  @db.Decimal
+  longitude         Decimal?  @db.Decimal
   frp               frp?      @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users             users?    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -174,6 +178,11 @@ model frp_wastes {
   createdat                DateTime?                @default(now()) @db.Timestamp(6)
   updatedat                DateTime?                @default(now()) @db.Timestamp(6)
   deletedat                DateTime?                @db.Timestamp(6)
+  lifecycle_stage          String?                  @db.VarChar
+  price_per_kg             Decimal?                 @db.Decimal
+  form                     String?                  @db.VarChar
+  latitude                 Decimal?                 @db.Decimal
+  longitude                Decimal?                 @db.Decimal
   collectors               collectors?              @relation(fields: [collector_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   frp                      frp?                     @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   manufacturing_processes  manufacturing_processes? @relation(fields: [manufacturing_process_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -211,6 +220,11 @@ model products {
   createdat   DateTime? @default(now()) @db.Timestamp(6)
   updatedat   DateTime? @default(now()) @db.Timestamp(6)
   deletedat   DateTime? @db.Timestamp(6)
+  price       Decimal?  @db.Decimal
+  quantity    Decimal?  @db.Decimal
+  latitude    Decimal?  @db.Decimal
+  longitude   Decimal?  @db.Decimal
+  form        String?
   frp         frp?      @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users       users?    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

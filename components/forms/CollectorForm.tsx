@@ -3,8 +3,8 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useCollectorById, useRegisterCollector, useUpdateCollector } from '../../hooks/useCollectors';
-import FormInput from '../ui/FormInput';
-import SubmitButton from '../ui/SubmitButton';
+import { FormInput } from '../ui/FormInput';
+import { SubmitButton } from '../ui/SubmitButton';
 
 export default function CollectorForm({ id }: { id?: string }) {
   const isEdit = !!id;

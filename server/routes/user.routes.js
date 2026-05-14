@@ -35,7 +35,7 @@ const getMe = asyncHandler(async (req, res) => {
     }
 
     // 2. Fetch user only if req.user exists
-    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    const user = await prisma.users.findUnique({ where: { id: req.user.id } });
 
     res.json({ data: user });
 });

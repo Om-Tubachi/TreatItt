@@ -1,5 +1,3 @@
-
-
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
 
@@ -15,9 +13,13 @@ class WasteService {
             manufacturingProcessId,
             collectorId,
             quantity,
-            date
+            date,
+            lifecycleStage,
+            latitude,
+            longitude,
+            pricePerKg,
+            form
         } = req.body
-        
 
         if ([userId, frpId, manufacturingProcessId].some(f => !f) || !quantity) {
             throw new ApiError(409, "Missing required fields")
@@ -30,7 +32,6 @@ class WasteService {
 `;
 
         const { user_exists, frp_exists, manufacturingprocess_exists } = result[0];
-        console.table(result[0])
         if (!user_exists || !frp_exists || !manufacturingprocess_exists)
             throw new ApiError(409, "invalid input for user or frp or manufacturing quantity")
 
@@ -41,7 +42,12 @@ class WasteService {
             collector_id: collectorId,
             quantity,
             date,
-            status: 'un-processed'
+            status: 'un-processed',
+            lifecycle_stage: lifecycleStage ?? null,
+            latitude: latitude ?? null,
+            longitude: longitude ?? null,
+            price_per_kg: pricePerKg ?? null,
+            form: form ?? null
         }
 
         const wasteEntry = await this.prisma.frp_wastes.create({
@@ -52,13 +58,10 @@ class WasteService {
             throw new ApiError(500, "Something went wrong while uploading waste")
 
         return wasteEntry
-
     }
 
     async getWasteById(req) {
         const { wasteId: id } = req.params
-        console.log(req.params);
-
 
         if (!id)
             throw new ApiError(400, "Waste entry ID is required")
@@ -74,7 +77,12 @@ class WasteService {
                         resin: true
                     }
                 },
-                manufacturing_processes: true,
+                users: { select: { id: true, username: true } }, // Moved to top level
+                manufacturing_processes: {
+                    include: {
+                        users: { select: { id: true, username: true } }
+                    }
+                },
                 collectors: true
             }
         })
@@ -85,7 +93,6 @@ class WasteService {
         return wasteEntry
     }
 
-    // paginate this
     async getWasteEntriesOfUser(req) {
         const { userId } = req.params
 
@@ -102,7 +109,6 @@ class WasteService {
         if (!user_in_users || !user_in_wastes)
             throw new ApiError(409, "Either user is not registered on the platform or user has no waste entries")
 
-
         const wasteEntries = await this.prisma.frp_wastes.findMany({
             where: { u_id: userId },
             include: {
@@ -114,39 +120,39 @@ class WasteService {
                         resin: true
                     }
                 },
-                manufacturing_processes: true,
+                users: { select: { id: true, username: true } }, // Corrected location
+                manufacturing_processes: {
+                    include: {
+                        users: { select: { id: true, username: true } }
+                    }
+                },
                 collectors: true
             }
         });
 
-        /**
-         * 
-         * alternatively: 
-         * 
-         * prisma.findMany({
-         * where: {u_id: userId}
-         * })
-         */
-        if (!wasteEntries.length)
-            throw new ApiError(500, "Something went wrong while fetching waste entries")
-
         return wasteEntries
     }
 
-    // paginate this
     async getAllWasteEntries(req) {
         const wasteEntries = await this.prisma.frp_wastes.findMany({
             include: {
                 frp: {
-                    include: { composition: true, category: true, grade: true, resin: true }
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
                 },
-                manufacturing_processes: true,
+                users: { select: { id: true, username: true } }, // Corrected location
+                manufacturing_processes: {
+                    include: {
+                        users: { select: { id: true, username: true } }
+                    }
+                },
                 collectors: true
             }
         })
-
-        if (!wasteEntries.length)
-            throw new ApiError(500, "Something went wrong while fetching waste entries")
 
         return wasteEntries
     }
@@ -172,15 +178,22 @@ class WasteService {
             where: { frp_id: frpId },
             include: {
                 frp: {
-                    include: { composition: true, category: true, grade: true, resin: true }
+                    include: {
+                        composition: true,
+                        category: true,
+                        grade: true,
+                        resin: true
+                    }
                 },
-                manufacturing_processes: true,
+                users: { select: { id: true, username: true } }, // Corrected location
+                manufacturing_processes: {
+                    include: {
+                        users: { select: { id: true, username: true } }
+                    }
+                },
                 collectors: true
             }
         });
-
-        if (!wasteEntries.length)
-            throw new ApiError(500, "Something went wrong while fetching waste entries")
 
         return wasteEntries
     }
@@ -203,21 +216,16 @@ class WasteService {
                 }),
             }
         })
-        // console.log(frpIds);
         const frpIds = frps.map((frp) => frp.id)
-        // answered:
         const wasteEntries = await this.prisma.frp_wastes.findMany({
             where: {
                 status,
-                ...(frpIds && { frp_id: { in: frpIds } }),
+                ...(frpIds.length > 0 && { frp_id: { in: frpIds } }),
                 ...(collectorId && { collector_id: collectorId })
             },
             include: {
-                collectors: true,  // waste has collectors link, go to collectors, fetch everything of a collector 
-                /**
-                 * waste → one frp row → its category row
-                 *                     → its grade row
-                 */
+                collectors: true,
+                users: { select: { id: true, username: true } }, // Corrected location
                 frp: {
                     include: {
                         category: {
@@ -231,27 +239,12 @@ class WasteService {
             }
         })
 
-        // alternative
-        /**
-         * 
-         * SELECT fw.*, c.address, c.latitude
-FROM frp_wastes fw
-LEFT JOIN frp f ON f.id = fw.frp_id
-LEFT JOIN collectors c ON c.id = fw.collector_id
-WHERE fw.status = 'un-processed'
-AND (f.category_id = $1 OR $1 IS NULL)
-AND (f.grade_id = $2 OR $2 IS NULL)
-         */
-
-        if (!wasteEntries.length)
-            throw new ApiError(500, "Something went wrong while fetching waste entries")
-
         return wasteEntries
     }
 
     async updateWaste(req) {
         const { wasteId } = req.params, userId = req?.user?.id;
-        const { frpId, manufacturingProcessId, collectorId, quantity, date, status } = req.body;
+        const { form, pricePerKg, longitude, latitude, lifecycleStage, frpId, manufacturingProcessId, collectorId, quantity, date, status } = req.body;
 
         if (!wasteId) throw new ApiError(400, "Waste ID is required");
 
@@ -265,6 +258,11 @@ AND (f.grade_id = $2 OR $2 IS NULL)
                 ...(quantity && { quantity: parseFloat(quantity) }),
                 ...(date && { date }),
                 ...(status && { status }),
+                ...(lifecycleStage && { lifecycle_stage: lifecycleStage }),
+                ...(latitude && { latitude }),
+                ...(longitude && { longitude }),
+                ...(pricePerKg && { price_per_kg: pricePerKg }),
+                ...(form && { form }),
                 updatedat: new Date()
             }
         });

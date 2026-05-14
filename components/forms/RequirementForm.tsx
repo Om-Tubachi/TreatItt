@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { colors, spacing } from '../../constants/theme';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, radius, spacing } from '../../constants/theme';
 import { FormInput } from '../ui/FormInput';
 import { FormPicker } from '../ui/FormPicker';
 import { ScreenHeader } from '../ui/ScreenHeader';
@@ -9,6 +9,7 @@ import { SubmitButton } from '../ui/SubmitButton';
 
 import { useFrp } from '../../hooks/useFrp';
 import { useCreateRequirement, useRequirementById, useUpdateRequirement } from '../../hooks/useRequirements';
+import { useLocation } from '../../utils/useLocation';
 
 interface RequirementFormProps {
   id?: string;
@@ -21,10 +22,13 @@ export default function RequirementForm({ id }: RequirementFormProps) {
   const { data, isLoading } = useRequirementById(id!, { enabled: isEdit });
   const { mutate: create, isPending: creating, error: createError } = useCreateRequirement();
   const { mutate: update, isPending: updating, error: updateError } = useUpdateRequirement();
+  const { latitude, longitude, captured, loading: locationLoading, captureLocation } = useLocation();
 
   const [frpId, setFrpId] = useState('');
   const [estReqPerMonth, setEstReqPerMonth] = useState('');
   const [actReqPerMonth, setActReqPerMonth] = useState('');
+  const [urgency, setUrgency] = useState('');
+  const [pricePerKg, setPricePerKg] = useState('');
 
   const error = createError || updateError;
   const isPending = creating || updating;
@@ -34,6 +38,8 @@ export default function RequirementForm({ id }: RequirementFormProps) {
       setFrpId(data.frpId ?? '');
       setEstReqPerMonth(String(data.estReqPerMonth ?? ''));
       setActReqPerMonth(String(data.actReqPerMonth ?? ''));
+      if (data.urgency) setUrgency(data.urgency);
+      if (data.pricePerKg) setPricePerKg(String(data.pricePerKg));
     }
   }, [data]);
 
@@ -44,6 +50,10 @@ export default function RequirementForm({ id }: RequirementFormProps) {
       frpId,
       estReqPerMonth: estReqPerMonth.toString(),
       actReqPerMonth: actReqPerMonth ? actReqPerMonth.toString() : undefined,
+      urgency: urgency || undefined,
+      pricePerKg: pricePerKg ? parseFloat(pricePerKg) : undefined,
+      latitude: latitude ? parseFloat(latitude) : undefined,
+      longitude: longitude ? parseFloat(longitude) : undefined,
     };
 
     if (isEdit) {
@@ -99,6 +109,32 @@ export default function RequirementForm({ id }: RequirementFormProps) {
           onChangeText={setActReqPerMonth}
         />
 
+        <FormPicker
+          label="Urgency"
+          value={urgency}
+          onChange={setUrgency}
+          options={[
+            { label: 'Immediate', value: 'immediate' },
+            { label: 'Within Month', value: 'within month' },
+            { label: 'Flexible', value: 'flexible' }
+          ]}
+        />
+
+        <FormInput
+          label="Budget (₹/kg)"
+          keyboardType="decimal-pad"
+          value={pricePerKg}
+          onChangeText={setPricePerKg}
+        />
+
+        <View>
+          <TouchableOpacity style={styles.locationButton} onPress={captureLocation} activeOpacity={0.7}>
+            <Text style={styles.locationButtonText}>📍 Use My Location</Text>
+            {locationLoading && <ActivityIndicator size="small" color={colors.primary} style={{ marginLeft: 8 }} />}
+          </TouchableOpacity>
+          {captured && <Text style={styles.capturedText}>📍 Location captured</Text>}
+        </View>
+
         {error && <Text style={styles.error}>{error.message}</Text>}
 
         <SubmitButton
@@ -118,4 +154,16 @@ const styles = StyleSheet.create({
   form: { padding: spacing.screenPadding, gap: spacing[5], paddingBottom: 60 },
   submit: { marginTop: spacing[4] },
   error: { color: colors.destructive || 'red', fontSize: 13, marginTop: -spacing[2] },
+  locationButton: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    padding: spacing[3], 
+    backgroundColor: colors.input, 
+    borderRadius: radius.lg, 
+    borderWidth: 1, 
+    borderColor: colors.border 
+  },
+  locationButtonText: { color: colors.primary, fontWeight: '600' },
+  capturedText: { fontSize: 12, color: colors.mutedForeground, marginTop: 4, textAlign: 'center' },
 });

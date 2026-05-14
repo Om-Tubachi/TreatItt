@@ -8,7 +8,7 @@ class ProductService {
 
     async create(req) {
         const userId = req?.user?.id;
-        const { frpId, description, date } = req.body;
+        const { frpId, description, date, quantity, price, latitude, longitude, form } = req.body;
 
         if ([userId, frpId].some(f => !f))
             throw new ApiError(400, "Missing required fields");
@@ -23,10 +23,15 @@ class ProductService {
 
         const product = await this.prisma.products.create({
             data: {
-                u_id: userId,
-                frp_id: frpId,
+                users: { connect: { id: userId } },
+                frp: { connect: { id: frpId } },
                 description,
-                date
+                date,
+                quantity: quantity ?? null,
+                price: price ?? null,
+                latitude: latitude ?? null,
+                longitude: longitude ?? null,
+                form: form ?? null
             }
         })
 
@@ -46,7 +51,8 @@ class ProductService {
                         grade: true,
                         resin: true
                     }
-                }
+                },
+                users: { select: { id: true, username: true } }
             }
         })
 
@@ -72,7 +78,8 @@ class ProductService {
                         grade: true,
                         resin: true
                     }
-                }
+                },
+                users: { select: { id: true, username: true } }
             }
         })
 
@@ -98,7 +105,8 @@ class ProductService {
                         grade: true,
                         resin: true
                     }
-                }
+                },
+                users: { select: { id: true, username: true } }
             }
         })
 
@@ -115,7 +123,10 @@ class ProductService {
             throw new ApiError(400, "FRP ID is required");
 
         const products = await this.prisma.products.findMany({
-            where: { frp_id: frpId }
+            where: { frp_id: frpId },
+            include: {
+                users: { select: { id: true, username: true } }
+            }
         })
 
         if (!products.length)
@@ -136,6 +147,9 @@ class ProductService {
                     ...(frp ? [{ frp_id: frp }] : []),
                     ...(compositionId ? [{ frp: { composition_id: compositionId } }] : [])
                 ]
+            },
+            include: {
+                users: { select: { id: true, username: true } }
             }
         });
 
@@ -161,6 +175,11 @@ class ProductService {
                 ...(updateData.frpId && { frp_id: updateData.frpId }),
                 ...(updateData.description && { description: updateData.description }),
                 ...(updateData.date && { date: updateData.date }),
+                ...(updateData.quantity && { quantity: parseFloat(updateData.quantity) }),
+                ...(updateData.price && { price: parseFloat(updateData.price) }),
+                ...(updateData.latitude && { latitude: updateData.latitude }),
+                ...(updateData.longitude && { longitude: updateData.longitude }),
+                ...(updateData.form && { form: updateData.form }),
                 updatedat: new Date()
             }
         })

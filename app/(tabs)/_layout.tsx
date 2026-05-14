@@ -193,11 +193,11 @@
 import { Tabs, router } from 'expo-router';
 import { useState } from 'react';
 import {
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { colors, layout, radius, shadows, spacing, typography } from '../../constants/theme';
 
@@ -218,9 +218,10 @@ const tabIconStyles = StyleSheet.create({
 });
 
 const FAB_ACTIONS = [
-    { label: 'Log Waste', emoji: '♻️', route: '/waste/create' },
-    { label: 'Log Requirement', emoji: '📋', route: '/requirement/create' },
-    { label: 'Register as Recycler', emoji: '🏭', route: '/recycler/create' },
+    { label: 'Sell Waste', emoji: '♻️', route: '/waste/create' },
+    { label: 'Sell Requirement', emoji: '📋', route: '/requirement/create' },
+    { label: 'Sell Product', emoji: '📋', route: '/product/create' },
+    
 ];
 
 export default function TabsLayout() {

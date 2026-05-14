@@ -1,294 +1,159 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Badge } from '../../components/ui/Badge';
-import { SectionTabs } from '../../components/ui/SectionTabs';
-import { StatCard } from '../../components/ui/StatCard';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import HamburgerMenu from '../../components/ui/HamburgerMenu';
 import { colors, radius, shadows, spacing, typography } from '../../constants/theme';
-import { useAuth } from '../../context/auth';
-import { useProductsByUser } from '../../hooks/useProducts';
-import { useRequirementsByUser } from '../../hooks/useRequirements';
-import { useTreatmentsByRecycler } from '../../hooks/useTreatments';
-import { useWasteEntriesOfUser } from '../../hooks/useWastes';
-
-type Tab = 'products' | 'requirements' | 'wastes' | 'services';
-const TABS: Tab[] = ['products', 'requirements', 'wastes', 'services'];
-
-function useTabData(tab: Tab, userId: string) {
-  const waste = useWasteEntriesOfUser(userId, { enabled: tab === 'wastes' });
-  const products = useProductsByUser(userId, { enabled: tab === 'products' });
-  const requirements = useRequirementsByUser(userId, { enabled: tab === 'requirements' });
-  const services = useTreatmentsByRecycler(userId, { enabled: tab === 'services' });
-  const map = { wastes: waste, products, requirements, services };
-  return map[tab];
-}
-
-function getWasteRoute(item: any) { return `/waste/${item.id}`; }
-function getProductRoute(item: any) { return `/product/${item.id}`; }
-
-function WasteCard({ item }: { item: any }) {
-  const statusMap: Record<string, any> = {
-    Listed: 'listed', Recycled: 'recycled', Pending: 'pending',
-  };
-  const variant = statusMap[item.status] ?? 'pending';
-  const date = item.created_at
-    ? new Date(item.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
-    : '—';
-
-  return (
-    <TouchableOpacity style={[styles.itemCard, shadows.card]} onPress={() => router.push(getWasteRoute(item) as any)} activeOpacity={0.75}>
-      <View style={styles.itemIcon}>
-        <Text style={styles.itemIconText}>♻</Text>
-      </View>
-      <View style={styles.itemBody}>
-        <Text style={styles.itemTitle}>{item.frp?.category?.category_name ?? 'Waste'}</Text>
-        <Text style={styles.itemMeta}>{item.quantity ?? '—'} kg · {item.manufacturing_process ?? '—'}</Text>
-        <View style={styles.itemFooter}>
-          <Badge variant={variant} />
-          <Text style={styles.itemDate}>{date}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-function GenericCard({ item, route, title, sub }: { item: any; route: string; title: string; sub: string }) {
-  return (
-    <TouchableOpacity style={[styles.itemCard, shadows.card]} onPress={() => router.push(route as any)} activeOpacity={0.75}>
-      <View style={styles.itemBody}>
-        <Text style={styles.itemTitle}>{title}</Text>
-        <Text style={styles.itemMeta}>{sub}</Text>
-      </View>
-      <Text style={styles.chevron}>›</Text>
-    </TouchableOpacity>
-  );
-}
 
 export default function HomeScreen() {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>('wastes');
-  const { data = [], isLoading } = useTabData(activeTab, user?.id ?? '');
-
-  const renderItem = ({ item }: { item: any }) => {
-    if (activeTab === 'wastes') return <WasteCard item={item} />;
-    if (activeTab === 'products') return (
-      <GenericCard
-        item={item}
-        route={getProductRoute(item)}
-        title={`${item.frp?.composition?.composition_name ?? 'Product'} | ${item.frp?.category?.category_name ?? ''}`}
-        sub={item.frp?.grade?.grade_name ?? '—'}
-      />
-    );
-    if (activeTab === 'requirements') return (
-      <GenericCard
-        item={item}
-        route={`/requirement/${item.id}`}
-        title={`Est. ${item.est_req_per_month ?? '—'} kg/mo`}
-        sub={item.status ?? '—'}
-      />
-    );
-    if (activeTab === 'services') return (
-      <GenericCard
-        item={item}
-        route={`/treatment/${item.id}`}
-        title={item.treatment_processes?.process ?? 'Service'}
-        sub={item.treatment_processes?.treatment_methods?.method ?? '—'}
-      />
-    );
-    return null;
-  };
+  const router = useRouter();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <View style={styles.screen}>
-      {/* Top bar */}
-      <View style={styles.topBar}>
-        <View>
-          <Text style={styles.userName}>{user?.username}</Text>
-          <Text style={styles.userSubtitle}>
-            {user?.designation} • {user?.company_name ?? 'Your Company'}
+    <SafeAreaView style={styles.root}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.hamButton}
+            onPress={() => setDrawerOpen(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.hamLine} />
+            <View style={[styles.hamLine, { width: 16 }]} />
+            <View style={styles.hamLine} />
+          </TouchableOpacity>
+        </View>
+
+        {/* About App Banner */}
+        <View style={styles.aboutCard}>
+          <Text style={styles.aboutTitle}>FRP Recycle</Text>
+          <Text style={styles.aboutBody}>
+            The industrial marketplace connecting waste generators, recyclers, and
+            collectors across the Indian composites industry. List your FRP waste,
+            find recyclers, and close the loop.
           </Text>
         </View>
-        <View style={styles.topActions}>
-          <TouchableOpacity style={styles.iconBtn} hitSlop={8}>
-            <Text style={styles.iconText}>🔍</Text>
+
+        {/* Buy / Sell */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[styles.actionCard, styles.buyCard]}
+            onPress={() => router.push('/(tabs)/MarketPlace')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.actionLabel}>Buy</Text>
+            <Text style={styles.actionSub}>Find FRP materials{'\n'}& recycled products</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn} hitSlop={8}>
-            <View style={styles.bellWrap}>
-              <Text style={styles.iconText}>🔔</Text>
-              <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
-            </View>
+
+          <TouchableOpacity
+            style={[styles.actionCard, styles.sellCard]}
+            onPress={() => router.push('/(tabs)/MarketPlace')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.actionLabel}>Sell</Text>
+            <Text style={styles.actionSub}>List your FRP waste{'\n'}& connect with buyers</Text>
           </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <StatCard
-            variant="dark"
-            label="Total Recycled"
-            value="—"
-            sub="Data coming soon"
-          />
-          <StatCard
-            variant="light"
-            label="Active Listings"
-            value="—"
-            sub="Data will show up here soon"
-          />
-        </View>
-
-        {/* Tab selector */}
-        <SectionTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
-
-        {/* List */}
-        {isLoading
-          ? <ActivityIndicator style={{ marginTop: 24 }} color={colors.primary} />
-          : (
-            <FlatList
-              data={data}
-              keyExtractor={item => item.id}
-              renderItem={renderItem}
-              scrollEnabled={false}
-              contentContainerStyle={styles.list}
-              ListEmptyComponent={
-                <View style={styles.empty}>
-                  <Text style={styles.emptyText}>No {activeTab} found.</Text>
-                </View>
-              }
-            />
-          )
-        }
-
-        {/* Sustainability banner */}
-        <View style={styles.banner}>
-          <View style={styles.bannerText}>
-            <Text style={styles.bannerTitle}>Sustainability Report</Text>
-            <Text style={styles.bannerSub}>Download your monthly compliance & recycling certificate.</Text>
-            <TouchableOpacity style={styles.bannerBtn}>
-              <Text style={styles.bannerBtnText}>⚡ Generate Now</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.bannerIcon}>🛡</Text>
         </View>
       </ScrollView>
-    </View>
+
+      <HamburgerMenu
+        visible={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        items={[
+          { label: 'Register as Recycler', onPress: () => router.push('/recycler/create') },
+          { label: 'Register as Collector', onPress: () => router.push('/collector/create') },
+        ]}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  scrollContent: { paddingBottom: 120 },
-  topBar: {
+  root: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    padding: spacing.screenPadding,
+    gap: spacing[4],
+    paddingBottom: 40,
+  },
+  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.screenPadding,
-    paddingTop: spacing[5],
-    paddingBottom: spacing[3],
+    paddingVertical: spacing[2],
   },
-  userName: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.foreground,
+  hamButton: {
+    gap: 5,
+    padding: spacing[1],
   },
-  userSubtitle: {
-    fontSize: typography.fontSize.sm,
-    color: colors.mutedForeground, // This keeps it secondary and readable
-    marginTop: 2,
-  },
-  topActions: { flexDirection: 'row', gap: spacing[3] },
-  iconBtn: { padding: spacing[1] },
-  iconText: { fontSize: 20 },
-  bellWrap: { position: 'relative' },
-  badge: {
-    position: 'absolute', top: -4, right: -4,
-    backgroundColor: colors.destructive,
+  hamLine: {
+    width: 22,
+    height: 2,
+    backgroundColor: colors.foreground,
     borderRadius: radius.full,
-    width: 16, height: 16,
-    alignItems: 'center', justifyContent: 'center',
   },
-  badgeText: { color: colors.white, fontSize: 9, fontWeight: '700' },
-  statsRow: {
-    flexDirection: 'row',
-    gap: spacing[3],
-    paddingHorizontal: spacing.screenPadding,
-    marginBottom: spacing[2],
-  },
-  list: { paddingHorizontal: spacing.screenPadding, gap: spacing[2] },
-  itemCard: {
-    backgroundColor: colors.card,
-    borderRadius: radius.xl,
-    padding: spacing.cardPadding,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing[3],
-    marginBottom: spacing[2],
-  },
-  itemIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.lg,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  itemIconText: { fontSize: 16 },
-  itemBody: { flex: 1 },
-  itemTitle: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.foreground,
-  },
-  itemMeta: {
-    fontSize: typography.fontSize.sm,
-    color: colors.mutedForeground,
-    marginTop: 2,
-  },
-  itemFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing[2],
-  },
-  itemDate: { fontSize: typography.fontSize.xs, color: colors.mutedForeground },
-  chevron: { fontSize: 20, color: colors.mutedForeground },
-  empty: { alignItems: 'center', paddingVertical: spacing[8] },
-  emptyText: { color: colors.mutedForeground, fontSize: typography.fontSize.sm },
-  banner: {
-    margin: spacing.screenPadding,
-    marginTop: spacing[4],
+  aboutCard: {
     backgroundColor: colors.surfaceDark,
     borderRadius: radius.xl,
     padding: spacing[5],
-    flexDirection: 'row',
-    alignItems: 'center',
+    gap: spacing[2],
+    ...shadows.card,
   },
-  bannerText: { flex: 1 },
-  bannerTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.surfaceDarkForeground,
+  aboutTitle: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: '700',
+    color: '#ffffff',
+    letterSpacing: -0.5,
   },
-  bannerSub: {
+  aboutBody: {
     fontSize: typography.fontSize.sm,
     color: 'rgba(255,255,255,0.6)',
-    marginTop: spacing[1],
-    lineHeight: 18,
+    lineHeight: 20,
   },
-  bannerBtn: {
-    marginTop: spacing[3],
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.4)',
-    borderRadius: radius.full,
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    alignSelf: 'flex-start',
+  actionRow: {
+    flexDirection: 'row',
+    gap: spacing[3],
   },
-  bannerBtnText: {
-    color: colors.surfaceDarkForeground,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
+  actionCard: {
+    flex: 1,
+    borderRadius: radius.xl,
+    padding: spacing[5],
+    gap: spacing[1],
+    minHeight: 140,
+    justifyContent: 'flex-end',
+    ...shadows.cardMd,
   },
-  bannerIcon: { fontSize: 48, opacity: 0.3 },
+  buyCard: {
+    backgroundColor: colors.primary,
+  },
+  sellCard: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  actionLabel: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: '700',
+    color: colors.foreground,
+  },
+  actionSub: {
+    fontSize: typography.fontSize.xs,
+    color: colors.mutedForeground,
+    lineHeight: 16,
+  },
 });

@@ -11,6 +11,7 @@ import { SubmitButton } from '../ui/SubmitButton';
 import { useFrp } from '../../hooks/useFrp';
 import { useManufacturingProcesses } from '../../hooks/useManufacturingProcesses';
 import { useUpdateWaste, useUploadWaste, useWasteById } from '../../hooks/useWastes';
+import { useLocation } from '../../utils/useLocation';
 
 const CONDITIONS = ['Pre-consumer', 'Post-consumer', 'End-of-life'] as const;
 type Condition = typeof CONDITIONS[number];
@@ -33,6 +34,7 @@ export default function WasteForm({ id }: WasteFormProps) {
   const { data, isLoading } = useWasteById(id!, { enabled: isEdit });
   const { mutate: create, isPending: creating, error: createError } = useUploadWaste();
   const { mutate: update, isPending: updating, error: updateError } = useUpdateWaste();
+  const { latitude, longitude, captured, loading: locationLoading, captureLocation } = useLocation();
 
   const [frpId, setFrpId] = useState('');
   const [manufacturingProcessId, setMfgId] = useState('');
@@ -41,6 +43,9 @@ export default function WasteForm({ id }: WasteFormProps) {
   const [condition, setCondition] = useState<Condition>('Pre-consumer');
   const [notes, setNotes] = useState('');
   const [collectorId, setCollectorId] = useState('');
+  const [lifecycleStage, setLifecycleStage] = useState('');
+  const [pricePerKg, setPricePerKg] = useState('');
+  const [form, setForm] = useState('');
 
   const isPending = creating || updating;
   const error = createError || updateError;
@@ -54,6 +59,9 @@ export default function WasteForm({ id }: WasteFormProps) {
       if (data.unit) setUnit(data.unit);
       if (data.condition) setCondition(data.condition);
       if (data.notes) setNotes(data.notes);
+      if (data.lifecycleStage) setLifecycleStage(data.lifecycleStage);
+      if (data.pricePerKg) setPricePerKg(String(data.pricePerKg));
+      if (data.form) setForm(data.form);
     }
   }, [data]);
 
@@ -69,6 +77,11 @@ export default function WasteForm({ id }: WasteFormProps) {
       notes,
       collectorId: collectorId?.trim() || undefined,
       date: new Date().toISOString(),
+      lifecycleStage: lifecycleStage || undefined,
+      latitude: latitude ? parseFloat(latitude) : undefined,
+      longitude: longitude ? parseFloat(longitude) : undefined,
+      pricePerKg: pricePerKg ? parseFloat(pricePerKg) : undefined,
+      form: form || undefined,
     };
 
     if (isEdit) {
@@ -97,6 +110,7 @@ export default function WasteForm({ id }: WasteFormProps) {
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <FormPicker
           label="FRP Type"
+          required
           placeholder="Select FRP type"
           value={frpId}
           onChange={setFrpId}
@@ -116,14 +130,14 @@ export default function WasteForm({ id }: WasteFormProps) {
               onChangeText={setQuantity}
             />
           </View>
-          <View style={styles.unitPicker}>
+          <div style={styles.unitPicker}>
             <FormPicker
               label="Unit"
               value={unit}
               onChange={setUnit}
               options={UNIT_OPTIONS}
             />
-          </View>
+          </div>
         </View>
 
         <FormPicker
@@ -152,6 +166,39 @@ export default function WasteForm({ id }: WasteFormProps) {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        <FormPicker
+          label="Lifecycle Stage"
+          value={lifecycleStage}
+          onChange={setLifecycleStage}
+          options={[
+            { label: 'Pre-life', value: 'pre-life' },
+            { label: 'In-life', value: 'in-life' },
+            { label: 'End-of-life', value: 'end-of-life' }
+          ]}
+        />
+
+        <FormInput
+          label="Form / Shape"
+          placeholder="e.g. Powder, Sheets, Offcuts"
+          value={form}
+          onChangeText={setForm}
+        />
+
+        <FormInput
+          label="Asking Price (₹/kg)"
+          keyboardType="decimal-pad"
+          value={pricePerKg}
+          onChangeText={setPricePerKg}
+        />
+
+        <View style={styles.field}>
+          <TouchableOpacity style={styles.locationButton} onPress={captureLocation} activeOpacity={0.7}>
+            <Text style={styles.locationButtonText}>📍 Use My Location</Text>
+            {locationLoading && <ActivityIndicator size="small" color={colors.primary} style={{ marginLeft: 8 }} />}
+          </TouchableOpacity>
+          {captured && <Text style={styles.capturedText}>📍 Location captured</Text>}
         </View>
 
         <FormInput
@@ -226,4 +273,16 @@ const styles = StyleSheet.create({
   textarea: { minHeight: 100, textAlignVertical: 'top' },
   submit: { marginTop: spacing[2] },
   errorText: { color: colors.destructive, fontSize: 13, marginTop: -10 },
+  locationButton: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    padding: spacing[3], 
+    backgroundColor: colors.input, 
+    borderRadius: radius.lg, 
+    borderWidth: 1, 
+    borderColor: colors.border 
+  },
+  locationButtonText: { color: colors.primary, fontWeight: '600' },
+  capturedText: { fontSize: 12, color: colors.mutedForeground, marginTop: 4, textAlign: 'center' },
 });
