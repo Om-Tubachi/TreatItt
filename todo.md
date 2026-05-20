@@ -7,10 +7,8 @@
 
 ---
 
-20 - 5 - 26
-
 1. onboarding stack
-2. login screens
+2. login screen                                                                         done
 3. tab bar
 4. styled home page -> discover: frp, manufacturing processes, treatment processes
 5. componets for all these:
@@ -22,3 +20,6 @@
                 1. treatment methods
                 2. default manufacturing processes
 6. listing page for all above ones
+
+
+21 5 26: in my notion
