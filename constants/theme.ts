@@ -12,6 +12,7 @@ export const colors = {
   white:         '#FFFFFF',
   black:         '#000000',
   error:         '#E53E3E',
+  tabsBackground:'#F5FFED'
 };
 
 export const typography = {
@@ -43,6 +44,20 @@ export const spacing = {
   lg:  16,
   xl:  20,
   xxl: 32,
+};
+
+export const tabBar = {
+  height:        72,
+  borderRadius:  50,
+  centerSize:    75,
+  centerLift:    20,
+  iconSize:      24,
+  centerIconSize: 28,
+  activeIconBg:  'rgba(255,255,255,0.25)',
+  inactiveColor: colors.white,
+  bg:            colors.primary,
+  centerBg:      colors.white,
+  centerColor:   colors.primaryDark,
 };
 
 export const layout = {
