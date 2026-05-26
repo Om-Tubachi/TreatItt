@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="reqGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+    <linearGradient id="boxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+  </defs>
+
+  <rect x="22" y="14" width="56" height="72" rx="8" fill="none" stroke="url(#reqGrad)" stroke-width="4" stroke-linejoin="round" />
+  
+  <path d="M40 14 V10 H60 V14" fill="none" stroke="url(#reqGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <line x1="34" y1="30" x2="66" y2="30" stroke="url(#reqGrad)" stroke-width="4" stroke-linecap="round" />
+  <line x1="34" y1="40" x2="54" y2="40" stroke="url(#reqGrad)" stroke-width="4" stroke-linecap="round" />
+
+  <g transform="translate(0, 12)">
+    <path d="M50 62 L32 52 V70 L50 80 Z" fill="url(#boxGrad)" opacity="0.85" />
+    
+    <path d="M50 62 L68 52 V70 L50 80 Z" fill="url(#boxGrad)" opacity="0.7" />
+    
+    <path d="M50 44 L68 52 L50 62 L32 52 Z" fill="url(#boxGrad)" />
+    
+    <path d="M50 62 V80" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+    <path d="M32 52 L50 62 L68 52" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+  </g>
+
+  <circle cx="72" cy="32" r="10" fill="#10B981" />
+  <path d="M67 32 L70 35 L77 28" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

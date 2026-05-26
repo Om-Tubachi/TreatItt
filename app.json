@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "InventoryApp",
-    "slug": "InventoryApp",
+    "name": "TreatIt",
+    "slug": "TreatIt",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
