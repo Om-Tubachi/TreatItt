@@ -99,7 +99,8 @@ const signupWithEmail = asyncHandler(
 const loginUser = asyncHandler(
     async (req, res) => {
         const { email, password } = req.body
-
+        console.log('hitting login');
+        
         if ([password, email].some((field) => field?.trim() === "")) {
             throw new ApiError(409, "All fields are mandatory")
         }
@@ -135,7 +136,8 @@ const loginUser = asyncHandler(
             httpOnly: true,
             secure: true
         }
-
+        console.log('returning user');
+        
         return res
             .status(200)
             .cookie("accessToken", accessToken, options)

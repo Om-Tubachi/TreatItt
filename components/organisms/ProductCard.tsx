@@ -1,10 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'; // Added TouchableOpacity
 import { card, colors, fontSize, typography } from '../../constants/theme';
 import { FrpShape, ProductEntity } from '../../types/entities';
 import { FrpPills } from '../molecules/FrpPills';
 
-interface Props { item: ProductEntity; }
+// Define onPress directly inside your component Props
+interface Props {
+    item: ProductEntity;
+    onPress: () => void;
+}
 
 const buildTitle = (frp?: FrpShape) =>
     [frp?.composition?.composition_name, frp?.category?.category_name,
@@ -13,8 +17,8 @@ const buildTitle = (frp?: FrpShape) =>
 const fmtDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
-export const ProductCard: React.FC<Props> = ({ item }) => (
-    <View style={styles.card}>
+export const ProductCard: React.FC<Props> = ({ item, onPress }) => (
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.imgBox} />
         <View style={styles.content}>
             <View style={styles.topRow}>
@@ -35,7 +39,7 @@ export const ProductCard: React.FC<Props> = ({ item }) => (
             </View>
             <Text style={styles.date}>{fmtDate(item.date)}</Text>
         </View>
-    </View>
+    </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({

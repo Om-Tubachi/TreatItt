@@ -1,21 +1,27 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
+
+export let _token: string | null = null;
+export const setToken = (t: string | null) => { _token = t; };
 
 export const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL, // e.g. http://192.168.x.x:3000
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// Auto handle 401s globally
+api.interceptors.request.use(config => {
+  if (Platform.OS !== 'web' && _token) {
+    config.headers.Authorization = `Bearer ${_token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   res => res,
   err => {
     if (err.response?.status === 401) {
-      // call signout
-      console.log(`This will always be triggered for 4XX, code is: {err.response.status}`);
-      
+      console.log(`[API] 401: ${err.response.status}`);
     }
     return Promise.reject(err);
   }

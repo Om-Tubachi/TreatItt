@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAllRecyclers, getFilteredRecyclers, getRecyclerById, registerRecycler, updateRecycler } from '../services/recyclers';
+import { getAllRecyclerProcesses, getAllRecyclers, getFilteredRecyclers, getRecyclerById, registerRecycler, updateRecycler } from '../services/recyclers';
 
 export const useAllRecyclers = (options = {}) =>
   useQuery({ queryKey: ['recyclers'], queryFn: getAllRecyclers, ...options });
@@ -25,3 +25,10 @@ export const useUpdateRecycler = () => {
     },
   });
 };
+
+export const useAllRecyclerProccesses = () => {
+  return useQuery({
+    queryKey: ['recycler-processes'],
+    queryFn: getAllRecyclerProcesses
+  });
+}

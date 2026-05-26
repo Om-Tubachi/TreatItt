@@ -1,17 +1,20 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { card, colors, fontSize, typography } from '../../constants/theme';
 import { WasteEntity } from '../../types/entities';
 import { Badge } from '../atoms/Badge';
 import { FrpPills } from '../molecules/FrpPills';
 
-interface Props { item: WasteEntity; }
+interface Props { 
+    item: WasteEntity;
+    onPress: () => void
+}
 
 const fmtDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
-export const WasteCard: React.FC<Props> = ({ item }) => (
-    <View style={styles.card}>
+export const WasteCard: React.FC<Props> = ({ item, onPress }) => (
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.topRow}>
             <Text style={styles.location}>📍 —</Text>
             <Text style={styles.soldBy}>SOLD BY: {item.users?.username?.toUpperCase()}</Text>
@@ -30,7 +33,7 @@ export const WasteCard: React.FC<Props> = ({ item }) => (
                 <Text style={styles.date}>{fmtDate(item.date)}</Text>
             </View>
         </View>
-    </View>
+    </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({

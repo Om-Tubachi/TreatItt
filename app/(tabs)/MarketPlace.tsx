@@ -1,3 +1,4 @@
+import { useAllRecyclerProccesses } from '@/hooks/useRecyclers';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -29,7 +30,7 @@ export default function MarketplaceScreen() {
   const { data: products = [] } = useAllProducts();
   const { data: wastes = [] } = useAllWaste();
   const { data: requirements = [] } = useAllRequirements();
-  const recyclingServices: any[] = []; // wire up when useAllRecycleProcesses hook is created
+  const { data: recyclingServices = [] } = useAllRecyclerProccesses()
 
   const listData = () => {
     switch (activeTab) {
@@ -42,9 +43,9 @@ export default function MarketplaceScreen() {
 
   const renderItem = ({ item }: { item: any }) => {
     switch (activeTab) {
-      case 'products': return <ProductCard item={item} />;
-      case 'requirements': return <RequirementCard item={item} />;
-      case 'waste': return <WasteCard item={item} />;
+      case 'products': return <ProductCard item={item} onPress={() => router.push(`/screens/product/${item.id}`)} />;
+      case 'requirements': return <RequirementCard item={item} onPress={() => router.push(`/screens/requirement/${item.id}`)} />;
+      case 'waste': return <WasteCard item={item} onPress={() => router.push(`/screens/waste/${item.id}`)} />;
       case 'recycling': return <RecyclingCard item={item} />;
     }
   };
@@ -57,13 +58,13 @@ export default function MarketplaceScreen() {
         </TouchableOpacity>
         <Text style={styles.title}>Market Place</Text>
         <TouchableOpacity><Text style={{ fontSize: 20 }}>
-          <IconCart   width={22} height={22} />
-          </Text></TouchableOpacity>
+          <IconCart width={22} height={22} />
+        </Text></TouchableOpacity>
       </View>
 
       <View style={styles.searchBar}>
         <Text>
-           <IconSearch width={18} height={18} />
+          <IconSearch width={18} height={18} />
         </Text>
         <TextInput
           style={styles.searchInput}

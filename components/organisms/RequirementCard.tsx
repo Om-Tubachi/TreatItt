@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { card, colors, fontSize, typography } from '../../constants/theme';
 import { RequirementEntity } from '../../types/entities';
 import { Badge } from '../atoms/Badge';
@@ -7,10 +7,13 @@ import { AvatarRow } from '../molecules/AvatarRow';
 import { FrpPills } from '../molecules/FrpPills';
 import { StatBox } from '../molecules/StatBox';
 
-interface Props { item: RequirementEntity; }
+interface Props {
+    item: RequirementEntity;
+    onPress: () => void
+}
 
-export const RequirementCard: React.FC<Props> = ({ item }) => (
-    <View style={styles.card}>
+export const RequirementCard: React.FC<Props> = ({ item, onPress }) => (
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.headerRow}>
             <Text style={styles.typeLabel}>REQUIREMENT</Text>
             <View style={styles.badges}>
@@ -37,7 +40,7 @@ export const RequirementCard: React.FC<Props> = ({ item }) => (
             lastName={item.users?.last_name}
             company={item.users?.company_name}
         />
-    </View>
+    </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
