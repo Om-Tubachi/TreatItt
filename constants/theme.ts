@@ -47,11 +47,11 @@ export const spacing = {
 };
 
 export const tabBar = {
-  height: 72,
-  borderRadius: 50,
+  height: 80,
+  borderRadius: 0,
   centerSize: 75,
   centerLift: 20,
-  iconSize: 24,
+  iconSize: 30,
   centerIconSize: 28,
   activeIconBg: 'rgba(255,255,255,0.25)',
   inactiveColor: colors.white,
@@ -77,4 +77,18 @@ export const card = {
   greenRadius: 18,
   statBg: '#F5FFED',
   padding: 16,
+};
+
+// Extracted Auth Message properties completely dependent on the configurations above
+export const authPrompt = {
+  bg: card.bg,
+  border: card.border,
+  borderWidth: card.borderWidth,
+  radius: card.radius,
+  padding: spacing.xl,        // Evaluates to 20px
+  gap: spacing.xs,            // Evaluates to 4px (Used for inner card elements layout)
+  buttonBg: colors.primaryDark,
+  buttonRadius: radius.md,    // Evaluates to 10px
+  buttonPaddingV: spacing.lg, // Evaluates to 12px internally
+  buttonPaddingH: spacing.xl, // Evaluates to 20px internally
 };

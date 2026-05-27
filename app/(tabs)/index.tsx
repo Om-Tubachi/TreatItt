@@ -24,8 +24,10 @@ export default function HomeScreen() {
           <TouchableOpacity><IconProfile width={22} height={22} /></TouchableOpacity>
         </View>
       </View>
-
-      <Text style={styles.greeting}>Hi, {user?.first_name ?? user?.username}</Text>
+      {
+        user && <Text style={styles.greeting}> Hi, {user?.first_name ?? user?.username}</Text>
+      }
+      
 
       {/* Location bar */}
       <View style={styles.locationBar}>

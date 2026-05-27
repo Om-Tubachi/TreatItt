@@ -16,9 +16,14 @@ function AuthGate() {
 
   useEffect(() => {
     if (isLoading) return;
+
     const inAuthGroup = segments[0] === '(auth)';
-    if (!user && !inAuthGroup) router.replace('/(auth)/sign-in');
-    else if (user && inAuthGroup) router.replace('/(tabs)');
+
+    // ONLY restrict if they are explicitly sitting inside the auth group pages while already logged in
+    if (user && inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+    // if(!user) router.replace('/(tabs)')
   }, [user, isLoading, segments]);
 
   return (
@@ -27,6 +32,13 @@ function AuthGate() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="screens" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="Sell"
+          options={{
+            presentation: 'modal',
+            headerShown: false
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </>

@@ -9,7 +9,7 @@ interface Props {
 
 export const Pill: React.FC<Props> = ({ label, style }) => (
     <View style={[styles.base, style]}>
-        <Text style={styles.text}>{label.toUpperCase()}</Text>
+        <Text style={styles.text}>{label.toLowerCase()}</Text>
     </View>
 );
 
@@ -18,8 +18,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.primaryDark,
         borderRadius: radius.xl,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
+        paddingHorizontal: 6,
+        paddingVertical: 1,
     },
     text: {
         fontFamily: typography.body,

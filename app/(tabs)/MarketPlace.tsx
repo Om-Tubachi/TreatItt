@@ -101,7 +101,7 @@ export default function MarketplaceScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: appBg },
+  screen: { flex: 1, backgroundColor: appBg},
 
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: layout.screenPadH, paddingTop: 56, paddingBottom: 16 },
   back: { fontSize: 28, color: colors.black, marginRight: 8, lineHeight: 28 },
