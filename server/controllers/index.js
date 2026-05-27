@@ -5,7 +5,6 @@ import {
 } from './collectorConsumers.controller.js'
 
 import { getFrp } from './frp.controller.js'
-
 import {
     createManufacturingProcess,
     deleteManufacturingProcess,
@@ -14,15 +13,16 @@ import {
     getSystemDefaults,
     updateManufacturingProcess
 } from './manufacturingProcess.controller.js'
+import { getAllTreatmentMethods } from './treatmentMethod.controller.js'
 
 import {
     createRecycleProcess,
     deleteRecycleProcess,
+    getAllRecycleProcesses,
     getFilteredRecycleProcesses,
     getRecycleProcessById,
     getRecycleProcessesByRecycler,
     updateRecycleProcess
-
 } from './recycleProcess.controller.js'
 
 import {
@@ -52,10 +52,10 @@ import {
 } from './products.controller.js'
 
 import {
-    registerRecycler,
     getAllRecyclers,
+    getFilteredRecyclers,
     getRecyclerById,
-    getFilteredRecyclers
+    registerRecycler
 } from './recycler.controller.js'
 
 
@@ -84,7 +84,6 @@ import {
     getTreatmentProcessById,
     getTreatmentProcessesByRecycler,
     updateTreatmentProcess,
-
 } from './treatmentProcess.controller.js'
 
 import {
@@ -101,45 +100,36 @@ import {
     createRequirement,
     deleteRequirement,
     getAllRequirements,
+    getFilteredRequirements,
     getRequirementById,
     getRequirementsByFrp,
-    updateRequirement,
-    getFilteredRequirements,
-    getRequirementsByUser
+    getRequirementsByUser,
+    updateRequirement
 } from './requirements.controller.js'
 
 export {
     createCollectorConsumer,
-    createCollectorSource,
-    createProduct,
-    createTreatment,
+    createCollectorSource, createManufacturingProcess, createProduct, createRecycleProcess, createRequirement, createTreatment,
     createTreatmentProcess,
     deleteCollector,
     deleteCollectorConsumer,
-    deleteCollectorSource,
-    deleteProduct,
-    deleteTreatment,
+    deleteCollectorSource, deleteManufacturingProcess, deleteProduct, deleteRecycleProcess, deleteRequirement, deleteTreatment,
     deleteTreatmentProcess,
     deleteWaste,
     getAllCollectors,
-    getAllProducts,
-    getAllRecyclers,
-    getAllTreatmentProcesses,
+    getAllProducts, getAllRecycleProcesses, getAllRecyclers, getAllRequirements, getAllTreatmentMethods, getAllTreatmentProcesses,
     getAllTreatments,
     getAllWasteEntries,
     getCollectorById,
     getCollectorsByProximity,
     getConsumersByCollector,
-    getFilteredProducts,
-    getFilteredRecyclers,
-    getFilteredTreatments,
-    getFilteredWaste,
-    getProductById,
+    getFilteredProducts, getFilteredRecycleProcesses, getFilteredRecyclers, getFilteredRequirements, getFilteredTreatments,
+    getFilteredWaste, getFrp, getManufacturingProcessById,
+    getManufacturingProcessesByUser, getProductById,
     getProductsByFrp,
-    getProductsByUser,
-    getRecyclerById,
-    getSourcesByCollector,
-    getTreatmentById,
+    getProductsByUser, getRecycleProcessById,
+    getRecycleProcessesByRecycler, getRecyclerById, getRequirementById,
+    getRequirementsByFrp, getRequirementsByUser, getSourcesByCollector, getSystemDefaults, getTreatmentById,
     getTreatmentProcessById,
     getTreatmentProcessesByRecycler,
     getTreatmentsByRecycler,
@@ -152,32 +142,9 @@ export {
     registerRecycler,
     signupWithEmail,
     signupWithGoogle,
-    updateCollector,
-    updateProduct,
-    updateTreatment,
+    updateCollector, updateManufacturingProcess, updateProduct, updateRecycleProcess, updateRequirement, updateTreatment,
     updateTreatmentProcess,
     updateWaste,
-    uploadWaste,
-    getFrp,
-    createManufacturingProcess,
-    deleteManufacturingProcess,
-    getManufacturingProcessById,
-    getManufacturingProcessesByUser,
-    getSystemDefaults,
-    updateManufacturingProcess,
-    createRecycleProcess,
-    deleteRecycleProcess,
-    getFilteredRecycleProcesses,
-    getRecycleProcessById,
-    getRecycleProcessesByRecycler,
-    updateRecycleProcess,
-    createRequirement,
-    deleteRequirement,
-    getAllRequirements,
-    getRequirementById,
-    getRequirementsByFrp,
-    updateRequirement,
-    getFilteredRequirements,
-    getRequirementsByUser
-
+    uploadWaste
 }
+

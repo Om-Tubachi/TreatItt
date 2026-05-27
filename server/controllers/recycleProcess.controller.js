@@ -20,6 +20,17 @@ const getRecycleProcessById = asyncHandler(
     }
 );
 
+export const getAllRecycleProcesses = asyncHandler(
+    async(req, res) => {
+        const processes = await recycleProcessService.getAllRecycleProcesses(req)
+        res
+            .status(200)
+            .json(
+                new ApiResponse(200, processes, "All recycle processes fetched succesfully")
+            )
+    }
+)
+
 const getRecycleProcessesByRecycler = asyncHandler(
     async (req, res) => {
         const recycleProcesses = await recycleProcessService.getRecycleProcessesByRecycler(req);

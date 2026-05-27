@@ -14,7 +14,7 @@ const app = express()
 app.use(cors({
     origin: [
         'http://localhost:8081',
-        'http://172.20.10.9:8081' // Your Expo dev server IP
+        'http://192.168.14.235:8081' // Your Expo dev server IP
     ],
     credentials: true
 }));

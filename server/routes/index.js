@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import treatmentMethodsRouter from '../routes/treatmentMethods.routes.js';
 import collectorConsumersRouter from './collectorConsumers.routes.js';
 import collectorsRouter from './collectors.routes.js';
 import collectorSourcesRouter from './collectorSources.routes.js';
@@ -14,7 +15,6 @@ import treatmentProcessRouter from './treatmentProcess.routes.js';
 import treatmentsRouter from './treatments.routes.js';
 import userRouter from './user.routes.js';
 import wasteRoutes from './waste.routes.js';
-
 const router = Router();
 
 router.use('/users', userRouter)
@@ -31,5 +31,5 @@ router.use('/recyclers', recyclerRouter)
 router.use('/requirements', requirementsRouter)
 router.use('/treatment-processes', treatmentProcessRouter)
 router.use('/treatments', treatmentsRouter)
-
+router.use('/treatment-methods', treatmentMethodsRouter)
 export default router;

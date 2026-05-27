@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+ 
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
 
@@ -17,7 +17,7 @@ class RecycleProcessService {
             charges
         } = req.body;
 
-        if (!treatmentId || !capacityKg)   
+        if (!treatmentId || !capacityKg)
             throw new ApiError(400, "Missing required fields");
 
         const result = await this.prisma.$queryRaw`
@@ -230,6 +230,26 @@ class RecycleProcessService {
         });
 
         return { success: true, message: "Recycle process deleted" };
+    }
+    async getAllRecycleProcesses(req) {
+        const processes = await this.prisma.recycler_processes.findMany({
+            include: {
+                recyclers: {
+                    include: {
+                        users: { select: { id: true, username: true, first_name: true, last_name: true, company_name: true } }
+                    }
+                },
+                treatments: {
+                    include: {
+                        frp: { include: { composition: true, category: true, grade: true, resin: true } },
+                        treatment_processes: {
+                            include: { treatment_methods: true }
+                        }
+                    }
+                }
+            }
+        });
+        return processes;
     }
 }
 
