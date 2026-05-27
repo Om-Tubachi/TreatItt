@@ -12,7 +12,6 @@ WebBrowser.maybeCompleteAuthSession();
 const TOKEN_KEY = 'accessToken';
 
 const persistToken = async (token: string) => {
-  console.log('coming here 2');
   
   setToken(token);
   if (Platform.OS !== 'web') await SecureStore.setItemAsync(TOKEN_KEY, token);
@@ -93,14 +92,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-  console.log('coming here 1');
 
       const res = await api.post("/users/auth/login", { email, password });
       await persistToken(res.data.data.accessToken);
       setUser(res.data.data.user);
       return { error: null };
     } catch (err: any) {
-      console.log( err.response?.data);
       
       return { error: err.response?.data?.message || "Login failed" };
     } finally {
