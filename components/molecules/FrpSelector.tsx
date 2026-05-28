@@ -2,47 +2,83 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, typography } from '../../constants/theme';
 import { useFrp } from '../../hooks/useFrp';
-import { SectionHeader } from './SectionHeader';
 import { SelectField } from './SelectField';
 
 interface Props {
     onFrpResolved: (frpId: string | null) => void;
+    initialValues?: {
+        composition?: { id: string; label: string };
+        category?: { id: string; label: string };
+        grade?: { id: string; label: string };
+        resin?: { id: string; label: string };
+    };
 }
 
-export const FrpSelector: React.FC<Props> = ({ onFrpResolved }) => {
-    const { data: frpList = [] } = useFrp();
+type SelectionItem = { id: string; label: string };
 
-    const [composition, setComposition] = useState<{ id: string; label: string } | undefined>();
-    const [grade, setGrade] = useState<{ id: string; label: string } | undefined>();
-    const [category, setCategory] = useState<{ id: string; label: string } | undefined>();
-    const [resin, setResin] = useState<{ id: string; label: string } | undefined>();
+export const FrpSelector: React.FC<Props> = ({ onFrpResolved, initialValues }) => {
+    const { data: lookups } = useFrp();
+
+    const [composition, setComposition] = useState<SelectionItem | undefined>(initialValues?.composition);
+    const [grade, setGrade] = useState<SelectionItem | undefined>(initialValues?.grade);
+    const [category, setCategory] = useState<SelectionItem | undefined>(initialValues?.category);
+    const [resin, setResin] = useState<SelectionItem | undefined>(initialValues?.resin);
     const [error, setError] = useState('');
 
-    const unique = (key: string, labelKey: string) =>
-        [...new Map(frpList.map((f: any) => [f[key]?.id, { id: f[key]?.id, label: f[key]?.[labelKey] }])).values()]
-            .filter((o: any) => o.id);
-
+    // Synchronize local dropdown state when async edit data hydrates from the parent
     useEffect(() => {
-        if (!composition && !grade && !category && !resin) { onFrpResolved(null); return; }
+        if (initialValues) {
+            if (initialValues.composition) setComposition(initialValues.composition);
+            if (initialValues.category) setCategory(initialValues.category);
+            if (initialValues.grade) setGrade(initialValues.grade);
+            if (initialValues.resin) setResin(initialValues.resin);
+        }
+    }, [initialValues]);
 
-        const match = frpList.find((f: any) =>
-            (!composition || f.composition?.id === composition.id) &&
-            (!grade || f.grade?.id === grade.id) &&
-            (!category || f.category?.id === category.id) &&
-            (!resin || f.resin?.id === resin.id)
-        );
+    // Extract list selections directly from structural atom lookups
+    const compositionOptions = lookups ? Object.values(lookups.compositions) : [];
+    const gradeOptions = lookups ? Object.values(lookups.grades) : [];
+    const categoryOptions = lookups ? Object.values(lookups.categories) : [];
+    const resinOptions = lookups ? Object.values(lookups.resins) : [];
 
-        if (match) { setError(''); onFrpResolved(match.id); }
-        else { setError('Invalid combination'); onFrpResolved(null); }
-    }, [composition, grade, category, resin]);
+    // Track state variations and resolve valid structural IDs downstream
+    useEffect(() => {
+        if (!composition && !grade && !category && !resin) {
+            onFrpResolved(null);
+            setError('');
+            return;
+        }
+
+        // Check validation combinations if you match against strict multi-relational pairs
+        if (lookups?.rawEntries) {
+            const exactMatch = lookups.rawEntries.find((entry: any) => 
+                (!composition || entry.composition?.id === composition.id) &&
+                (!category || entry.category?.id === category.id) &&
+                (!grade || entry.grade?.id === grade.id) &&
+                (!resin || entry.resin?.id === resin.id)
+            );
+
+            if (exactMatch) {
+                setError('');
+                onFrpResolved(exactMatch.id);
+            } else {
+                setError('Invalid combination');
+                onFrpResolved(null);
+            }
+        } else {
+            // Fallback resolution path if checking unlinked dynamic atoms
+            const fallbackId = category?.id || composition?.id || grade?.id || resin?.id || null;
+            setError('');
+            onFrpResolved(fallbackId);
+        }
+    }, [composition, grade, category, resin, lookups]);
 
     return (
         <View style={styles.container}>
-            <SectionHeader title="FRP Material" />
-            <SelectField label="Composition" options={unique('composition', 'composition_name')} selected={composition} onSelect={setComposition} />
-            <SelectField label="Grade" options={unique('grade', 'grade_name')} selected={grade} onSelect={setGrade} />
-            <SelectField label="Category" options={unique('category', 'category_name')} selected={category} onSelect={setCategory} />
-            <SelectField label="Resin" options={unique('resin', 'resin_name')} selected={resin} onSelect={setResin} />
+            <SelectField label="Composition" options={compositionOptions} selected={composition} onSelect={setComposition} />
+            <SelectField label="Grade" options={gradeOptions} selected={grade} onSelect={setGrade} />
+            <SelectField label="Category" options={categoryOptions} selected={category} onSelect={setCategory} />
+            <SelectField label="Resin" options={resinOptions} selected={resin} onSelect={setResin} />
             {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
     );
@@ -50,5 +86,5 @@ export const FrpSelector: React.FC<Props> = ({ onFrpResolved }) => {
 
 const styles = StyleSheet.create({
     container: { gap: 12 },
-    error: { fontFamily: typography.body, fontSize: fontSize.xs, color: colors.error },
+    error: { fontFamily: typography.body, fontSize: fontSize.xs, color: colors.error, marginTop: 4 },
 });

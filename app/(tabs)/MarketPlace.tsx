@@ -30,7 +30,7 @@ export default function MarketplaceScreen() {
   const { data: products = [] } = useAllProducts();
   const { data: wastes = [] } = useAllWaste();
   const { data: requirements = [] } = useAllRequirements();
-  const { data: recyclingServices = [] } = useAllRecyclerProccesses()
+  const { data: recyclingServices = [] } = useAllRecyclerProccesses();
 
   const listData = () => {
     switch (activeTab) {
@@ -43,10 +43,14 @@ export default function MarketplaceScreen() {
 
   const renderItem = ({ item }: { item: any }) => {
     switch (activeTab) {
-      case 'products': return <ProductCard item={item} onPress={() => router.push(`/screens/product/${item.id}`)} />;
-      case 'requirements': return <RequirementCard item={item} onPress={() => router.push(`/screens/requirement/${item.id}`)} />;
-      case 'waste': return <WasteCard item={item} onPress={() => router.push(`/screens/waste/${item.id}`)} />;
-      case 'recycling': return <RecyclingCard item={item} />;
+      case 'products': 
+        return <ProductCard item={item} onPress={() => router.push(`/screens/product/${item.id}`)} />;
+      case 'requirements': 
+        return <RequirementCard item={item} onPress={() => router.push(`/screens/requirement/${item.id}`)} />;
+      case 'waste': 
+        return <WasteCard item={item} onPress={() => router.push(`/screens/waste/${item.id}`)} />;
+      case 'recycling': 
+        return <RecyclingCard item={item} />;
     }
   };
 
@@ -57,15 +61,13 @@ export default function MarketplaceScreen() {
           <Text style={styles.back}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Market Place</Text>
-        <TouchableOpacity><Text style={{ fontSize: 20 }}>
+        <TouchableOpacity>
           <IconCart width={22} height={22} />
-        </Text></TouchableOpacity>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.searchBar}>
-        <Text>
-          <IconSearch width={18} height={18} />
-        </Text>
+        <IconSearch width={18} height={18} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search scrap rate"
@@ -91,30 +93,27 @@ export default function MarketplaceScreen() {
 
       <FlatList
         data={listData()}
-        keyExtractor={i => i.id}
+        keyExtractor={(item, index) => item.id ? String(item.id) : `market-${activeTab}-${index}`}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        extraData={activeTab} 
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: appBg},
-
+  screen: { flex: 1, backgroundColor: appBg },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: layout.screenPadH, paddingTop: 56, paddingBottom: 16 },
   back: { fontSize: 28, color: colors.black, marginRight: 8, lineHeight: 28 },
   title: { flex: 1, textAlign: 'center', fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.black },
-
   searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.xl, marginHorizontal: layout.screenPadH, paddingHorizontal: 14, paddingVertical: 10, gap: 8, borderWidth: card.borderWidth, borderColor: card.border, marginBottom: 16 },
   searchInput: { flex: 1, fontFamily: typography.body, fontSize: fontSize.sm, color: colors.black },
-
   tabRow: { flexDirection: 'row', gap: 8, paddingHorizontal: layout.screenPadH, marginBottom: 16, flexWrap: 'wrap' },
   tab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.primary },
   tabActive: { backgroundColor: colors.primary },
   tabText: { fontFamily: typography.bodyMed, fontSize: fontSize.xs, color: colors.primaryDark },
   tabTextActive: { color: colors.white },
-
   list: { paddingHorizontal: layout.screenPadH, paddingBottom: 100 },
 });

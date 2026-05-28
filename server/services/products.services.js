@@ -79,7 +79,7 @@ class ProductService {
                         resin: true
                     }
                 },
-                users: { select: { id: true, username: true } }
+                users: { select: { id: true, username: true, first_name:true, last_name:true, company_name:true } }
             }
         })
 

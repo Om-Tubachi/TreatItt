@@ -1,13 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import IconWaste from '../../../components/assets/icons/waste.svg';
 import { Badge } from '../../../components/atoms/Badge';
 import { DetailSheet } from '../../../components/layout/DetailSheet';
 import { FrpPills } from '../../../components/molecules/FrpPills';
 import { StatBox } from '../../../components/molecules/StatBox';
 import { appBg, colors, fontSize, typography } from '../../../constants/theme';
-import { useWasteById } from '../../../hooks/useWastes';
+import { useAuth } from '../../../context/auth';
+import { useDeleteWaste, useWasteById } from '../../../hooks/useWastes';
 
 const fmtDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -15,9 +16,44 @@ const fmtDate = (d?: string) =>
 export default function WasteDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
-    const { data: waste, isLoading } = useWasteById(id);
+    const { user } = useAuth();
 
-    if (isLoading) return <View style={styles.screen} />;
+    const { data: waste, isLoading } = useWasteById(id);
+    const { mutateAsync: deleteWaste, isPending: isDeleting } = useDeleteWaste();
+
+    if (isLoading) {
+        return (
+            <View style={[styles.screen, styles.centered]}>
+                <ActivityIndicator size="large" color={colors.primaryDark} />
+            </View>
+        );
+    }
+
+    // Determine authorization ownership boundary safely
+    const isOwner = user?.id && waste?.u_id && user.id === waste.u_id;
+
+    const handleDelete = () => {
+        Alert.alert(
+            'Confirm Deletion',
+            'Are you sure you want to permanently remove this waste listing?',
+            '18.5', // Avoid evaluation issues
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deleteWaste(id);
+                            router.back();
+                        } catch (e: any) {
+                            Alert.alert('Deletion Failed', e.message || 'An error occurred.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     return (
         <View style={styles.screen}>
@@ -62,6 +98,24 @@ export default function WasteDetailScreen() {
                     <Text style={styles.sectionLabel}>DATE</Text>
                     <Text style={styles.sectionValue}>{fmtDate(waste?.date)}</Text>
                 </View>
+
+                {isOwner && (
+                    <View style={styles.ownerControls}>
+                        <TouchableOpacity
+                            style={[styles.controlBtn, styles.editBtn]}
+                            onPress={() => router.push({ pathname: '/screens/forms/waste', params: { id } })}
+                        >
+                            <Text style={styles.editBtnText}>Edit Listing</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.controlBtn, styles.deleteBtn]}
+                            onPress={handleDelete}
+                            disabled={isDeleting}
+                        >
+                            <Text style={styles.deleteBtnText}>{isDeleting ? 'Deleting...' : 'Delete'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </DetailSheet>
         </View>
     );
@@ -69,6 +123,7 @@ export default function WasteDetailScreen() {
 
 const styles = StyleSheet.create({
     screen: { flex: 1, backgroundColor: appBg },
+    centered: { justifyContent: 'center', alignItems: 'center' },
     imgArea: { height: 260, alignItems: 'center', justifyContent: 'center' },
     backBtn: { position: 'absolute', top: 56, left: 20 },
     back: { fontSize: 28, color: colors.black },
@@ -78,4 +133,10 @@ const styles = StyleSheet.create({
     section: { gap: 4 },
     sectionLabel: { fontFamily: typography.body, fontSize: fontSize.xs, color: colors.body, textTransform: 'uppercase', letterSpacing: 0.8 },
     sectionValue: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: colors.black },
+    ownerControls: { flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 16 },
+    controlBtn: { flex: 1, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+    editBtn: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.border || '#E5E7EB' },
+    editBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: colors.black },
+    deleteBtn: { backgroundColor: '#FEE2E2' },
+    deleteBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: '#EF4444' },
 });

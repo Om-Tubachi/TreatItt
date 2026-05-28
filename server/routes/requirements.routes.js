@@ -14,17 +14,8 @@ import { verifyWasteProducer } from '../middlewares/wasteProducer.middleware.js'
 
 const router = Router();
 
-router
-    .route('/user/:userId')
-    .get(getRequirementsByUser);
-
-router
-    .route('/frp/:frpId')
-    .get(getRequirementsByFrp);
-
-router
-    .route('/:id')
-    .get(getRequirementById);
+router.route('/user/:userId').get(getRequirementsByUser);
+router.route('/frp/:frpId').get(getRequirementsByFrp);
 
 router
     .route('/')
@@ -36,10 +27,10 @@ router
         return getAllRequirements(req, res, next);
     });
 
-router.use(verifyJWT, verifyWasteProducer);
 router
-    .route('/:requirementId')
-    .patch(updateRequirement)
-    .delete(deleteRequirement);
+    .route('/:id')
+    .get(getRequirementById)
+    .patch(verifyJWT, verifyWasteProducer, updateRequirement)
+    .delete(verifyJWT, verifyWasteProducer, deleteRequirement);
 
 export default router;

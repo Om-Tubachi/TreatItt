@@ -1,54 +1,200 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { card, colors, fontSize, typography } from '../../constants/theme';
+import React, { useState } from 'react';
+import { LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import { card, colors, fontSize, spacing, typography } from '../../constants/theme';
 import { RequirementEntity } from '../../types/entities';
 import { Badge } from '../atoms/Badge';
-import { AvatarRow } from '../molecules/AvatarRow';
 import { FrpPills } from '../molecules/FrpPills';
-import { StatBox } from '../molecules/StatBox';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface Props {
     item: RequirementEntity;
-    onPress: () => void
+    onPress: () => void;
 }
 
-export const RequirementCard: React.FC<Props> = ({ item, onPress }) => (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-        <View style={styles.headerRow}>
-            <Text style={styles.typeLabel}>REQUIREMENT</Text>
-            <View style={styles.badges}>
-                {item.urgency && <Badge label={item.urgency} variant={item.urgency.toLowerCase() === 'urgent' ? 'urgent' : 'outlined'} />}
-                {item.status && <Badge label={item.status} variant="accepting" />}
+export const RequirementCard: React.FC<Props> = ({ item, onPress }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    const toggleExpand = (e: any) => {
+        e.stopPropagation();
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setExpanded(!expanded);
+    };
+
+    const primaryTitle = [item.frp?.composition?.composition_name, item.frp?.category?.category_name]
+        .filter(Boolean)
+        .join(' ') || 'FRP Requirement';
+
+    const secondaryTitle = [item.frp?.grade?.grade_name, item.frp?.resin?.resin_name]
+        .filter(Boolean)
+        .join(' · ');
+
+    const userCompany = item.users?.company_name || `${item.users?.first_name || ''} ${item.users?.last_name || ''}`.trim();
+
+    return (
+        <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
+            {/* Remote Top Right Corner Tag / Badges */}
+            <View style={styles.topRightContainer}>
+                {item.urgency && (
+                    <Badge 
+                        label={item.urgency.toUpperCase()} 
+                        variant={item.urgency.toLowerCase() === 'urgent' ? 'urgent' : 'outlined'} 
+                    />
+                )}
             </View>
-        </View>
 
-        <FrpPills frp={item.frp} row />
+            <View style={styles.content}>
+                {/* Header Section */}
+                <View style={styles.headerBlock}>
+                    <Text style={styles.typeLabel}>REQUIREMENT</Text>
+                    <Text style={styles.title} numberOfLines={1}>{primaryTitle}</Text>
+                    {secondaryTitle ? (
+                        <Text style={styles.subtitle} numberOfLines={1}>{secondaryTitle}</Text>
+                    ) : null}
+                    {userCompany ? (
+                        <Text style={styles.companyText} numberOfLines={1}>
+                            BY: {userCompany.toUpperCase()}
+                        </Text>
+                    ) : null}
+                </View>
 
-        <View style={styles.statsRow}>
-            <StatBox label="EST REQ/MONTH" value={item.est_req_per_month ? `${item.est_req_per_month} kg` : '—'} />
-            <View style={{ width: 8 }} />
-            <StatBox label="ACT REQ/MONTH" value={item.act_req_per_month ? `${item.act_req_per_month} kg` : '—'} />
-        </View>
+                {/* Collapsible Specs Container */}
+                <View style={styles.specificationsContainer}>
+                    <TouchableOpacity onPress={toggleExpand} style={styles.toggleBtn} activeOpacity={0.6}>
+                        <Text style={styles.toggleText}>
+                            {expanded ? 'Hide Specs ▲' : '+ Specs ▼'}
+                        </Text>
+                    </TouchableOpacity>
+                    <FrpPills frp={item.frp} expanded={expanded} />
+                </View>
 
-        <View>
-            <Text style={styles.priceLabel}>PRICE / KG</Text>
-            <Text style={styles.price}>₹{item.price_per_kg ?? '—'}</Text>
-        </View>
+                <View style={styles.divider} />
 
-        <AvatarRow
-            firstName={item.users?.first_name}
-            lastName={item.users?.last_name}
-            company={item.users?.company_name}
-        />
-    </TouchableOpacity>
-);
+                {/* Bottom Triple Stats Row */}
+                <View style={styles.footerRow}>
+                    <View style={styles.statGroup}>
+                        <Text style={styles.statLabel}>PRICE / KG</Text>
+                        <Text style={styles.price}>₹{item.price_per_kg ?? '—'}</Text>
+                    </View>
+
+                    <View style={[styles.statGroup, { alignItems: 'center' }]}>
+                        <Text style={styles.statLabel}>EST / MONTH</Text>
+                        <Text style={styles.statVal}>{item.est_req_per_month ? `${item.est_req_per_month} kg` : '—'}</Text>
+                    </View>
+
+                    <View style={[styles.statGroup, { alignItems: 'flex-end' }]}>
+                        <Text style={styles.statLabel}>ACT / MONTH</Text>
+                        <Text style={styles.statVal}>{item.act_req_per_month ? `${item.act_req_per_month} kg` : '—'}</Text>
+                    </View>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+};
 
 const styles = StyleSheet.create({
-    card: { backgroundColor: card.bg, borderRadius: card.radius, borderWidth: card.borderWidth, borderColor: card.border, padding: card.padding, gap: 12, marginBottom: 12 },
-    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    typeLabel: { fontFamily: typography.body, fontSize: fontSize.xs, color: colors.body, textTransform: 'uppercase', letterSpacing: 1 },
-    badges: { flexDirection: 'row', gap: 6 },
-    statsRow: { flexDirection: 'row' },
-    priceLabel: { fontFamily: typography.body, fontSize: fontSize.xs, color: colors.body, textTransform: 'uppercase', letterSpacing: 0.8 },
-    price: { fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.primaryDark },
+    card: {
+        position: 'relative',
+        backgroundColor: card.bg,
+        borderRadius: card.radius,
+        borderWidth: card.borderWidth,
+        borderColor: card.border,
+        padding: card.padding,
+        marginBottom: spacing.md,
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    content: {
+        flex: 1,
+    },
+    topRightContainer: {
+        position: 'absolute',
+        top: 12,
+        right: 14,
+        zIndex: 10,
+        flexDirection: 'row',
+        gap: 6,
+    },
+    headerBlock: {
+        paddingRight: '30%',
+        marginBottom: 2,
+    },
+    typeLabel: {
+        fontFamily: typography.body,
+        fontSize: 8.5,
+        color: colors.placeholder,
+        letterSpacing: 0.8,
+        marginBottom: 2,
+    },
+    title: {
+        fontFamily: typography.heading,
+        fontSize: fontSize.sm,
+        color: colors.black,
+        lineHeight: 18,
+    },
+    subtitle: {
+        fontFamily: typography.bodyMed,
+        fontSize: 10.5,
+        color: colors.body,
+        marginTop: 1,
+    },
+    companyText: {
+        fontFamily: typography.body,
+        fontSize: 8.5,
+        color: colors.body,
+        marginTop: 2,
+    },
+    specificationsContainer: {
+        alignItems: 'flex-start',
+        marginTop: 6,
+        marginBottom: 2,
+    },
+    toggleBtn: {
+        paddingVertical: 3,
+        paddingHorizontal: 8,
+        backgroundColor: colors.inputBg,
+        borderRadius: 4,
+        borderWidth: 0.5,
+        borderColor: card.border,
+    },
+    toggleText: {
+        fontFamily: typography.bodyMed,
+        fontSize: 9,
+        color: colors.body,
+    },
+    divider: {
+        height: 0.5,
+        backgroundColor: card.border,
+        marginVertical: 6,
+    },
+    footerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+    },
+    statGroup: {
+        flex: 1,
+    },
+    statLabel: {
+        fontFamily: typography.body,
+        fontSize: 9,
+        color: colors.placeholder,
+        textTransform: 'uppercase',
+        marginBottom: 1,
+    },
+    price: {
+        fontFamily: typography.heading,
+        fontSize: fontSize.md,
+        color: colors.primaryDark,
+    },
+    statVal: {
+        fontFamily: typography.bodyMed,
+        fontSize: fontSize.xs,
+        color: colors.black,
+    },
 });

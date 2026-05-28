@@ -2,7 +2,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { DetailSheet } from '../../../components/layout/DetailSheet';
-import { FrpPills } from '../../../components/molecules/FrpPills';
 import { SectionHeader } from '../../../components/molecules/SectionHeader';
 import { appBg, colors, fontSize, layout, typography } from '../../../constants/theme';
 import { useFrp } from '../../../hooks/useFrp';
@@ -10,10 +9,12 @@ import { useFrp } from '../../../hooks/useFrp';
 export default function FrpDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
-    const { data: frpList = [] } = useFrp();
-    const item = frpList.find((f: any) => f.id === id);
+    const { data: lookups } = useFrp();
 
-    if (!item) return <View style={styles.screen} />;
+    // Pull the matching element context from the exact structured lookup bucket
+    const currentCategory = lookups?.categories[id];
+
+    if (!currentCategory) return <View style={styles.screen} />;
 
     return (
         <View style={styles.screen}>
@@ -23,14 +24,10 @@ export default function FrpDetailScreen() {
                 <View style={{ width: 24 }} />
             </View>
             <DetailSheet>
-                <SectionHeader title="Composition" />
-                <FrpPills frp={item} row />
-                {item.description && (
-                    <>
-                        <SectionHeader title="Description" />
-                        <Text style={styles.desc}>{item.description}</Text>
-                    </>
-                )}
+                <SectionHeader title="Category" />
+                <View style={styles.pillContainer}>
+                     <Text style={styles.pillText}>{currentCategory.label}</Text>
+                </View>
             </DetailSheet>
         </View>
     );
@@ -41,5 +38,6 @@ const styles = StyleSheet.create({
     header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: layout.screenPadH, paddingTop: 56, paddingBottom: 16 },
     back: { fontSize: 28, color: colors.black, marginRight: 8 },
     title: { flex: 1, textAlign: 'center', fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.black },
-    desc: { fontFamily: typography.body, fontSize: fontSize.sm, color: colors.black },
+    pillContainer: { backgroundColor: colors.primaryLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, alignSelf: 'flex-start', marginTop: 8 },
+    pillText: { fontFamily: typography.body, fontSize: fontSize.sm, color: colors.primary }
 });

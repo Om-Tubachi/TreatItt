@@ -222,24 +222,29 @@ class RequirementsService {
     }
 
     async updateRequirement(req) {
-        const { requirementId } = req.params;
+        const { id } = req.params;
         const updateData = req.body;
+        console.log(id);
+        console.log('---data---');
+        console.log(updateData);
 
-        if (!requirementId)
+
+
+        if (!id)
             throw new ApiError(400, "Requirement ID is required");
 
         const updatedRequirement = await this.prisma.frp_requirements.update({
-            where: { id: requirementId },
+            where: { id: id },
             data: {
-                ...(updateData.frpId && { frp_id: updateData.frpId }),
-                ...(updateData.estReqPerMonth && { est_req_per_month: updateData.estReqPerMonth }),
-                ...(updateData.actReqPerMonth && { act_req_per_month: updateData.actReqPerMonth }),
-                ...(updateData.status && { status: updateData.status }),
-                ...(updateData.urgency && { urgency: updateData.urgency }),
-                ...(updateData.pricePerKg && { price_per_kg: updateData.pricePerKg }),
-                ...(updateData.latitude && { latitude: updateData.latitude }),
-                ...(updateData.longitude && { longitude: updateData.longitude }),
-                updatedat: new Date()
+                ...(updateData?.frpId && { frp_id: updateData.frpId }),
+                ...(updateData?.estReqPerMonth !== undefined && { est_req_per_month: updateData.estReqPerMonth }),
+                ...(updateData?.actReqPerMonth !== undefined && { act_req_per_month: updateData.actReqPerMonth }),
+                ...(updateData?.status !== undefined && { status: updateData.status }),
+                ...(updateData?.urgency !== undefined && { urgency: updateData.urgency }),
+                ...(updateData?.pricePerKg !== undefined && { price_per_kg: updateData.pricePerKg }),
+                ...(updateData?.latitude !== undefined && { latitude: updateData.latitude }),
+                ...(updateData?.longitude !== undefined && { longitude: updateData.longitude }),
+                // updatedat: new Date()
             }
         });
 
@@ -250,13 +255,13 @@ class RequirementsService {
     }
 
     async deleteRequirement(req) {
-        const { requirementId } = req.params;
+        const { id } = req.params;
 
-        if (!requirementId)
+        if (!id)
             throw new ApiError(400, "Requirement ID is required");
 
         await this.prisma.frp_requirements.delete({
-            where: { id: requirementId }
+            where: { id: id }
         });
 
         return { success: true, message: "Requirement entry deleted" };
