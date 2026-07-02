@@ -147,22 +147,25 @@ model frp {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model frp_requirements {
-  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  u_id              String?   @db.Uuid
-  frp_id            String?   @db.Uuid
-  est_req_per_month Decimal?  @db.Decimal
-  act_req_per_month Decimal?  @db.Decimal
-  date              DateTime? @db.Timestamp(6)
-  status            String?   @db.VarChar
-  createdat         DateTime? @default(now()) @db.Timestamp(6)
-  updatedat         DateTime? @default(now()) @db.Timestamp(6)
-  deletedat         DateTime? @db.Timestamp(6)
-  price_per_kg      Decimal?  @db.Decimal
-  urgency           String?   @db.VarChar
-  latitude          Decimal?  @db.Decimal
-  longitude         Decimal?  @db.Decimal
-  frp               frp?      @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users             users?    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  u_id              String?         @db.Uuid
+  frp_id            String?         @db.Uuid
+  est_req_per_month Decimal?        @db.Decimal
+  act_req_per_month Decimal?        @db.Decimal
+  date              DateTime?       @db.Timestamp(6)
+  status            String?         @db.VarChar
+  createdat         DateTime?       @default(now()) @db.Timestamp(6)
+  updatedat         DateTime?       @default(now()) @db.Timestamp(6)
+  deletedat         DateTime?       @db.Timestamp(6)
+  price_per_kg      Decimal?        @db.Decimal
+  urgency           String?         @db.VarChar
+  latitude          Decimal?        @db.Decimal
+  longitude         Decimal?        @db.Decimal
+  form_template_id  String?         @db.Uuid
+  metrics_range     Json?           @default("{}")
+  form_templates    form_templates? @relation(fields: [form_template_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frp               frp?            @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users             users?          @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -180,10 +183,12 @@ model frp_wastes {
   deletedat                DateTime?                @db.Timestamp(6)
   lifecycle_stage          String?                  @db.VarChar
   price_per_kg             Decimal?                 @db.Decimal
-  form                     String?                  @db.VarChar
   latitude                 Decimal?                 @db.Decimal
   longitude                Decimal?                 @db.Decimal
+  form_template_id         String?                  @db.Uuid
+  metrics                  Json?                    @default("{}")
   collectors               collectors?              @relation(fields: [collector_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  form_templates           form_templates?          @relation(fields: [form_template_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   frp                      frp?                     @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   manufacturing_processes  manufacturing_processes? @relation(fields: [manufacturing_process_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users                    users?                   @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -212,37 +217,40 @@ model manufacturing_processes {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model products {
-  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  u_id        String?   @db.Uuid
-  frp_id      String?   @db.Uuid
-  description String?
-  date        DateTime? @db.Timestamp(6)
-  createdat   DateTime? @default(now()) @db.Timestamp(6)
-  updatedat   DateTime? @default(now()) @db.Timestamp(6)
-  deletedat   DateTime? @db.Timestamp(6)
-  price       Decimal?  @db.Decimal
-  quantity    Decimal?  @db.Decimal
-  latitude    Decimal?  @db.Decimal
-  longitude   Decimal?  @db.Decimal
-  form        String?
-  frp         frp?      @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users       users?    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id               String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  u_id             String?         @db.Uuid
+  frp_id           String?         @db.Uuid
+  description      String?
+  date             DateTime?       @db.Timestamp(6)
+  createdat        DateTime?       @default(now()) @db.Timestamp(6)
+  updatedat        DateTime?       @default(now()) @db.Timestamp(6)
+  deletedat        DateTime?       @db.Timestamp(6)
+  price            Decimal?        @db.Decimal
+  quantity         Decimal?        @db.Decimal
+  latitude         Decimal?        @db.Decimal
+  longitude        Decimal?        @db.Decimal
+  form_template_id String?         @db.Uuid
+  metrics          Json?           @default("{}")
+  form_templates   form_templates? @relation(fields: [form_template_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  frp              frp?            @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users            users?          @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model recycler_processes {
-  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  recycler_id  String?     @db.Uuid
-  treatment_id String?     @db.Uuid
-  capacity_kg  Decimal?    @db.Decimal
-  schedules    String?
-  date         DateTime?   @db.Timestamp(6)
-  charges      Decimal?    @db.Decimal
-  createdat    DateTime?   @default(now()) @db.Timestamp(6)
-  updatedat    DateTime?   @default(now()) @db.Timestamp(6)
-  deletedat    DateTime?   @db.Timestamp(6)
-  recyclers    recyclers?  @relation(fields: [recycler_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
-  treatments   treatments? @relation(fields: [treatment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                 String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  recycler_id        String?     @db.Uuid
+  treatment_id       String?     @db.Uuid
+  schedules          Json?
+  date               DateTime?   @db.Timestamp(6)
+  createdat          DateTime?   @default(now()) @db.Timestamp(6)
+  updatedat          DateTime?   @default(now()) @db.Timestamp(6)
+  deletedat          DateTime?   @db.Timestamp(6)
+  accepted_form_ids  String[]    @default([]) @db.Uuid
+  capability_metrics Json?       @default("{}")
+  process_details    Json?       @default("{}")
+  recyclers          recyclers?  @relation(fields: [recycler_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+  treatments         treatments? @relation(fields: [treatment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -267,9 +275,10 @@ model resin {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model treatment_methods {
-  id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  method              String                @unique @db.VarChar
-  treatment_processes treatment_processes[]
+  id                       String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  method                   String                @unique @db.VarChar
+  process_parameter_schema Json?                 @default("[]")
+  treatment_processes      treatment_processes[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -293,4 +302,46 @@ model treatments {
   frp                  frp?                 @relation(fields: [frp_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users                users?               @relation(fields: [recycler_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   treatment_processes  treatment_processes? @relation(fields: [treatment_process_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model form_templates {
+  id               String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  form_name        String             @unique @db.VarChar(255)
+  applies_to       String[]           @default([]) @db.VarChar
+  metrics_schema   Json               @default("[]")
+  createdat        DateTime?          @default(now()) @db.Timestamp(6)
+  updatedat        DateTime?          @default(now()) @db.Timestamp(6)
+  frp_requirements frp_requirements[]
+  frp_wastes       frp_wastes[]
+  lookup_entries   lookup_entries[]
+  products         products[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model lookup_entries {
+  id               String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  entity_type      String          @db.VarChar
+  entity_id        String          @db.Uuid
+  u_id             String?         @db.Uuid
+  frp_id           String?         @db.Uuid
+  composition_id   String?         @db.Uuid
+  category_id      String?         @db.Uuid
+  grade_id         String?         @db.Uuid
+  resin_id         String?         @db.Uuid
+  form_template_id String?         @db.Uuid
+  extra_filters    Json?           @default("{}")
+  price            Decimal?        @db.Decimal
+  status           String?         @db.VarChar
+  latitude         Decimal?        @db.Decimal
+  longitude        Decimal?        @db.Decimal
+  createdat        DateTime?       @default(now()) @db.Timestamp(6)
+  updatedat        DateTime?       @default(now()) @db.Timestamp(6)
+  form_templates   form_templates? @relation(fields: [form_template_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([entity_type, entity_id])
+  @@index([category_id], map: "idx_lookup_category")
+  @@index([composition_id], map: "idx_lookup_composition")
+  @@index([entity_type, form_template_id], map: "idx_lookup_entity_form")
+  @@index([extra_filters(ops: JsonbPathOps)], map: "idx_lookup_gin", type: Gin)
 }

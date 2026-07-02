@@ -1,5 +1,6 @@
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
+import { lookupSyncService } from './lookupSync.service.js';
 
 class ProductService {
     constructor(prisma) {
@@ -37,7 +38,7 @@ class ProductService {
 
         if (!product)
             throw new ApiError(500, "Something went wrong while creating product");
-
+        await lookupSyncService.syncLookupEntry('product', product.id)
         return product;
     }
 
@@ -186,7 +187,7 @@ class ProductService {
 
         if (!updatedProduct)
             throw new ApiError(500, "Something went wrong while updating product");
-
+        await lookupSyncService.syncLookupEntry('product', productId)
         return updatedProduct;
     }
 
@@ -199,7 +200,7 @@ class ProductService {
         await this.prisma.products.delete({
             where: { id: productId }
         });
-
+        await lookupSyncService.deleteLookupEntry('product', productId)
         return { success: true, message: "Product deleted" };
     }
 }

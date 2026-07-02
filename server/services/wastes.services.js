@@ -1,5 +1,6 @@
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
+import { lookupSyncService } from './lookupSync.service.js';
 
 class WasteService {
     constructor(prisma) {
@@ -56,7 +57,7 @@ class WasteService {
 
         if (!wasteEntry)
             throw new ApiError(500, "Something went wrong while uploading waste")
-
+        await lookupSyncService.syncLookupEntry('waste', wasteEntry.id)
         return wasteEntry
     }
 
@@ -268,7 +269,7 @@ class WasteService {
         });
 
         if (!updatedWaste) throw new ApiError(500, "Failed to update waste entry");
-
+        await lookupSyncService.syncLookupEntry('waste', wasteId)
         return updatedWaste;
     }
 
@@ -280,7 +281,7 @@ class WasteService {
         await this.prisma.frp_wastes.delete({
             where: { id: wasteId }
         });
-
+        await lookupSyncService.deleteLookupEntry('waste', wasteId)
         return { success: true, message: "Waste entry deleted" };
     }
 }

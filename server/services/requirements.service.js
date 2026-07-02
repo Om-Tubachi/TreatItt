@@ -50,7 +50,7 @@ class RequirementsService {
 
         if (!requirementEntry)
             throw new ApiError(500, "Something went wrong while creating requirement");
-
+        await lookupSyncService.syncLookupEntry('requirement', requirementEntry.id);
         return requirementEntry;
     }
 
@@ -250,8 +250,8 @@ class RequirementsService {
 
         if (!updatedRequirement)
             throw new ApiError(500, "Failed to update requirement entry");
-
-        return updatedRequirement;
+        await lookupSyncService.syncLookupEntry('requirement', updatedRequirement.id);
+        return updatedRequirement;  
     }
 
     async deleteRequirement(req) {
@@ -263,7 +263,7 @@ class RequirementsService {
         await this.prisma.frp_requirements.delete({
             where: { id: id }
         });
-
+        await lookupSyncService.deleteLookupEntry('requirement', id)
         return { success: true, message: "Requirement entry deleted" };
     }
 }
