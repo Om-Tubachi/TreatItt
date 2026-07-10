@@ -4,6 +4,7 @@ import treatmentMethodsRouter from '../routes/treatmentMethods.routes.js';
 import collectorConsumersRouter from './collectorConsumers.routes.js';
 import collectorsRouter from './collectors.routes.js';
 import collectorSourcesRouter from './collectorSources.routes.js';
+import formTemplateRoutes from './formtemplate.routes.js';
 import frpRouter from './frp.routes.js';
 import industriesRouter from './industries.routes.js';
 import manufacturingProcessRouter from './manufacturingProcess.routes.js';
@@ -32,4 +33,5 @@ router.use('/requirements', requirementsRouter)
 router.use('/treatment-processes', treatmentProcessRouter)
 router.use('/treatments', treatmentsRouter)
 router.use('/treatment-methods', treatmentMethodsRouter)
+router.use('/form-templates', formTemplateRoutes)
 export default router;
