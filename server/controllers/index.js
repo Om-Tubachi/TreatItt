@@ -148,3 +148,4 @@ export {
     uploadWaste
 }
 
+export { getFacetOptions, search } from './search.controller.js'

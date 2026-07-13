@@ -12,6 +12,7 @@ import productsRouter from './products.routes.js';
 import recycleProcessRouter from './recycleProcess.routes.js';
 import recyclerRouter from './recycler.routes.js';
 import requirementsRouter from './requirements.routes.js';
+import searchRouter from './search.routes.js';
 import treatmentProcessRouter from './treatmentProcess.routes.js';
 import treatmentsRouter from './treatments.routes.js';
 import userRouter from './user.routes.js';
@@ -34,4 +35,5 @@ router.use('/treatment-processes', treatmentProcessRouter)
 router.use('/treatments', treatmentsRouter)
 router.use('/treatment-methods', treatmentMethodsRouter)
 router.use('/form-templates', formTemplateRoutes)
+router.use('/search', searchRouter)
 export default router;
