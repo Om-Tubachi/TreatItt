@@ -1,3 +1,4 @@
+import { FilterProvider } from '@/context/filter';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -56,9 +57,11 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AuthGate />
-      </AuthProvider>
+      <FilterProvider>
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
+      </FilterProvider>
     </QueryClientProvider>
   );
 }
