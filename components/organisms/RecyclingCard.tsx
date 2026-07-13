@@ -1,19 +1,56 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import { card, colors, fontSize, spacing, typography } from '../../constants/theme';
+import { useFormTemplates } from '../../hooks/useFormTemplates';
 import { RecyclingEntity } from '../../types/entities';
+import { formatProcessDetails } from '../../utils/processDetailsFormat';
+import { formatSchedule } from '../../utils/scheduleFormat';
 import { Badge } from '../atoms/Badge';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface Props {
     item: RecyclingEntity;
+    onPress?: () => void;
 }
 
-export const RecyclingCard: React.FC<Props> = ({ item }) => {
+export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
+    const [expanded, setExpanded] = useState(false);
+    const { data: templates } = useFormTemplates();
+
+    const toggleExpand = (e: any) => {
+        e.stopPropagation();
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setExpanded(!expanded);
+    };
+
+    // Extract structure backed cleanly by your backend relational paths
     const method = item.treatments?.treatment_processes?.treatment_methods?.method ?? '';
     const process = item.treatments?.treatment_processes?.process ?? '';
+    const parameterSchema = item.treatments?.treatment_processes?.treatment_methods?.process_parameter_schema;
+    
+    const formattedDetails = formatProcessDetails(item.process_details, parameterSchema);
+    const readableSchedule = formatSchedule(item.schedules);
+
+    // Resolve structural accepted UUID form templates against current cached template array
+    const resolvedForms = (item.accepted_form_ids ?? [])
+        .map(id => templates?.find(t => t.id === id)?.form_name || null)
+        .filter((name): name is string => !!name);
+
+    const hasExpandableContent = 
+        formattedDetails.length > 0 || 
+        (item.capability_metrics && Object.keys(item.capability_metrics).length > 0) || 
+        resolvedForms.length > 0;
 
     return (
-        <View style={styles.card}>
+        <TouchableOpacity 
+            style={styles.card} 
+            onPress={onPress} 
+            disabled={!onPress}
+            activeOpacity={0.8}
+        >
             {/* Absolute Status Tracking Tag */}
             <View style={styles.statusContainer}>
                 <Badge label="AVAILABLE" variant="available" />
@@ -32,6 +69,65 @@ export const RecyclingCard: React.FC<Props> = ({ item }) => {
                         </Text>
                     ) : null}
                 </View>
+
+                {/* Collapsible Technical Spec Sub-System */}
+                {hasExpandableContent && (
+                    <View style={styles.specificationsContainer}>
+                        <TouchableOpacity 
+                            onPress={toggleExpand} 
+                            style={styles.toggleBtn}
+                            activeOpacity={0.6}
+                        >
+                            <Text style={styles.toggleText}>
+                                {expanded ? 'Hide Details ▲' : '+ View Process Details ▼'}
+                            </Text>
+                        </TouchableOpacity>
+
+                        {expanded && (
+                            <View style={styles.expandedContent}>
+                                {/* Process Schema Metric Rows */}
+                                {formattedDetails.map((detail, idx) => (
+                                    <View key={idx} style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>{detail.label}</Text>
+                                        <Text style={styles.detailValue}>{detail.value}</Text>
+                                    </View>
+                                ))}
+
+                                {/* Capability Metrics Object Map Rendering */}
+                                {item.capability_metrics && Object.keys(item.capability_metrics).length > 0 && (
+                                    <View style={styles.metricsContainer}>
+                                        <Text style={styles.sectionLabel}>CAPABILITY METRICS</Text>
+                                        <View style={styles.pillsWrap}>
+                                            {Object.entries(item.capability_metrics).map(([key, val]) => (
+                                                <View key={key} style={styles.metricPill}>
+                                                    <Text style={styles.pillText}>
+                                                        {key.replace(/_/g, ' ')}: {String(val)}
+                                                    </Text>
+                                                </View>
+                                            ))}
+                                        </View>
+                                    </View>
+                                )}
+
+                                {/* Form Templates Array Grouping */}
+                                {resolvedForms.length > 0 && (
+                                    <View style={styles.formsContainer}>
+                                        <Text style={styles.sectionLabel}>ACCEPTED COMPLIANCE FORMS</Text>
+                                        <View style={styles.pillsWrap}>
+                                            {resolvedForms.map((formName, idx) => (
+                                                <View key={idx} style={[styles.metricPill, styles.formPill]}>
+                                                    <Text style={[styles.pillText, styles.formPillText]}>
+                                                        📄 {formName}
+                                                    </Text>
+                                                </View>
+                                            ))}
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
+                        )}
+                    </View>
+                )}
 
                 <View style={styles.divider} />
 
@@ -54,12 +150,12 @@ export const RecyclingCard: React.FC<Props> = ({ item }) => {
                     <View style={[styles.statGroup, { alignItems: 'flex-end' }]}>
                         <Text style={styles.statLabel}>SCHEDULES</Text>
                         <Text style={styles.date} numberOfLines={1}>
-                            {item.schedules ?? '—'}
+                            {readableSchedule}
                         </Text>
                     </View>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -109,6 +205,87 @@ const styles = StyleSheet.create({
         fontSize: 10.5,
         color: colors.body,
         marginTop: 2,
+    },
+    specificationsContainer: {
+        alignItems: 'flex-start',
+        marginTop: 8,
+        width: '100%',
+    },
+    toggleBtn: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        backgroundColor: colors.inputBg,
+        borderRadius: 4,
+        borderWidth: 0.5,
+        borderColor: card.border,
+    },
+    toggleText: {
+        fontFamily: typography.bodyMed,
+        fontSize: 9,
+        color: colors.body,
+    },
+    expandedContent: {
+        width: '100%',
+        marginTop: 8,
+        backgroundColor: colors.inputBg,
+        padding: 8,
+        borderRadius: 6,
+        gap: 8,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderBottomWidth: 0.5,
+        borderBottomColor: card.border,
+        paddingVertical: 4,
+    },
+    detailLabel: {
+        fontFamily: typography.body,
+        fontSize: 11,
+        color: colors.body,
+    },
+    detailValue: {
+        fontFamily: typography.bodyMed,
+        fontSize: 11,
+        color: colors.black,
+    },
+    metricsContainer: {
+        marginTop: 4,
+    },
+    formsContainer: {
+        marginTop: 4,
+    },
+    sectionLabel: {
+        fontFamily: typography.body,
+        fontSize: 8,
+        color: colors.placeholder,
+        letterSpacing: 0.5,
+        marginBottom: 4,
+    },
+    pillsWrap: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 4,
+    },
+    metricPill: {
+        backgroundColor: colors.black === '#000000' ? '#FFFFFF' : colors.inputBg,
+        borderWidth: 0.5,
+        borderColor: card.border,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    pillText: {
+        fontFamily: typography.body,
+        fontSize: 9,
+        color: colors.black,
+    },
+    formPill: {
+        backgroundColor: '#EBF5FF',
+        borderColor: '#BEE3F8',
+    },
+    formPillText: {
+        color: '#2B6CB0',
     },
     divider: {
         height: 0.5,

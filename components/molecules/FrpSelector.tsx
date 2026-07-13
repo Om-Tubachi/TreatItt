@@ -51,7 +51,7 @@ export const FrpSelector: React.FC<Props> = ({ onFrpResolved, initialValues }) =
 
         // Check validation combinations if you match against strict multi-relational pairs
         if (lookups?.rawEntries) {
-            const exactMatch = lookups.rawEntries.find((entry: any) => 
+            const exactMatch = lookups.rawEntries.find((entry: any) =>
                 (!composition || entry.composition?.id === composition.id) &&
                 (!category || entry.category?.id === category.id) &&
                 (!grade || entry.grade?.id === grade.id) &&
@@ -66,10 +66,8 @@ export const FrpSelector: React.FC<Props> = ({ onFrpResolved, initialValues }) =
                 onFrpResolved(null);
             }
         } else {
-            // Fallback resolution path if checking unlinked dynamic atoms
-            const fallbackId = category?.id || composition?.id || grade?.id || resin?.id || null;
-            setError('');
-            onFrpResolved(fallbackId);
+            // lookups not ready yet — don't guess, don't resolve
+            onFrpResolved(null);
         }
     }, [composition, grade, category, resin, lookups]);
 

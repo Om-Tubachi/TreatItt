@@ -36,7 +36,6 @@ export default function WasteDetailScreen() {
         Alert.alert(
             'Confirm Deletion',
             'Are you sure you want to permanently remove this waste listing?',
-            '18.5', // Avoid evaluation issues
             [
                 { text: 'Cancel', style: 'cancel' },
                 {
@@ -67,7 +66,7 @@ export default function WasteDetailScreen() {
             <DetailSheet>
                 <Text style={styles.soldBy}>SOLD BY: {waste?.users?.username?.toUpperCase()}</Text>
 
-                <FrpPills frp={waste?.frp} />
+                <FrpPills frp={waste?.frp} expanded={true} />
 
                 <View style={styles.badgeRow}>
                     {waste?.lifecycle_stage && <Badge label={waste.lifecycle_stage} variant="amber" />}
@@ -135,7 +134,7 @@ const styles = StyleSheet.create({
     sectionValue: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: colors.black },
     ownerControls: { flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 16 },
     controlBtn: { flex: 1, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-    editBtn: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.border || '#E5E7EB' },
+    editBtn: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.black || '#E5E7EB' },
     editBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: colors.black },
     deleteBtn: { backgroundColor: '#FEE2E2' },
     deleteBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: '#EF4444' },
