@@ -19,7 +19,8 @@ class WasteService {
             latitude,
             longitude,
             pricePerKg,
-            form
+            formTemplateId,
+            metrics
         } = req.body
 
         if ([userId, frpId, manufacturingProcessId].some(f => !f) || !quantity) {
@@ -36,23 +37,30 @@ class WasteService {
         if (!user_exists || !frp_exists || !manufacturingprocess_exists)
             throw new ApiError(409, "invalid input for user or frp or manufacturing quantity")
 
-        const payload = {
-            u_id: userId,
-            manufacturing_process_id: manufacturingProcessId,
-            frp_id: frpId,
-            collector_id: collectorId,
-            quantity,
-            date,
-            status: 'un-processed',
-            lifecycle_stage: lifecycleStage ?? null,
-            latitude: latitude ?? null,
-            longitude: longitude ?? null,
-            price_per_kg: pricePerKg ?? null,
-            form: form ?? null
+        if (formTemplateId) {
+            const templateCheck = await this.prisma.$queryRaw`
+            select exists (select 1 from form_templates where id = ${formTemplateId}::uuid) as template_exists
+        `
+            if (!templateCheck[0].template_exists)
+                throw new ApiError(409, "invalid input for form template")
         }
 
         const wasteEntry = await this.prisma.frp_wastes.create({
-            data: { ...payload }
+            data: {
+                users: { connect: { id: userId } },
+                manufacturing_processes: { connect: { id: manufacturingProcessId } },
+                frp: { connect: { id: frpId } },
+                ...(collectorId && { collectors: { connect: { id: collectorId } } }),
+                quantity,
+                date,
+                status: 'un-processed',
+                lifecycle_stage: lifecycleStage ?? null,
+                latitude: latitude ?? null,
+                longitude: longitude ?? null,
+                price_per_kg: pricePerKg ?? null,
+                ...(formTemplateId && { form_templates: { connect: { id: formTemplateId } } }),
+                metrics: metrics ?? {}
+            }
         })
 
         if (!wasteEntry)
@@ -78,7 +86,8 @@ class WasteService {
                         resin: true
                     }
                 },
-                users: { select: { id: true, username: true } }, // Moved to top level
+                form_templates: true,
+                users: { select: { id: true, username: true } },
                 manufacturing_processes: {
                     include: {
                         users: { select: { id: true, username: true } }
@@ -121,7 +130,8 @@ class WasteService {
                         resin: true
                     }
                 },
-                users: { select: { id: true, username: true } }, // Corrected location
+                form_templates: true,
+                users: { select: { id: true, username: true } },
                 manufacturing_processes: {
                     include: {
                         users: { select: { id: true, username: true } }
@@ -145,7 +155,8 @@ class WasteService {
                         resin: true
                     }
                 },
-                users: { select: { id: true, username: true } }, // Corrected location
+                form_templates: true,
+                users: { select: { id: true, username: true } },
                 manufacturing_processes: {
                     include: {
                         users: { select: { id: true, username: true } }
@@ -186,7 +197,8 @@ class WasteService {
                         resin: true
                     }
                 },
-                users: { select: { id: true, username: true } }, // Corrected location
+                form_templates: true,
+                users: { select: { id: true, username: true } },
                 manufacturing_processes: {
                     include: {
                         users: { select: { id: true, username: true } }
@@ -226,7 +238,7 @@ class WasteService {
             },
             include: {
                 collectors: true,
-                users: { select: { id: true, username: true } }, // Corrected location
+                users: { select: { id: true, username: true } },
                 frp: {
                     include: {
                         category: {
@@ -245,17 +257,38 @@ class WasteService {
 
     async updateWaste(req) {
         const { wasteId } = req.params, userId = req?.user?.id;
-        const { form, pricePerKg, longitude, latitude, lifecycleStage, frpId, manufacturingProcessId, collectorId, quantity, date, status } = req.body;
+        const {
+            pricePerKg,
+            longitude,
+            latitude,
+            lifecycleStage,
+            frpId,
+            manufacturingProcessId,
+            collectorId,
+            quantity,
+            date,
+            status,
+            formTemplateId,
+            metrics
+        } = req.body;
 
         if (!wasteId) throw new ApiError(400, "Waste ID is required");
+
+        if (formTemplateId) {
+            const templateCheck = await this.prisma.$queryRaw`
+            select exists (select 1 from form_templates where id = ${formTemplateId}::uuid) as template_exists
+        `
+            if (!templateCheck[0].template_exists)
+                throw new ApiError(409, "invalid input for form template")
+        }
 
         const updatedWaste = await this.prisma.frp_wastes.update({
             where: { id: wasteId },
             data: {
-                ...(frpId && { frp_id: frpId }),
-                ...(manufacturingProcessId && { manufacturing_process_id: manufacturingProcessId }),
-                ...(collectorId && { collector_id: collectorId }),
-                ...(userId && { u_id: userId }),
+                ...(frpId && { frp: { connect: { id: frpId } } }),
+                ...(manufacturingProcessId && { manufacturing_processes: { connect: { id: manufacturingProcessId } } }),
+                ...(collectorId && { collectors: { connect: { id: collectorId } } }),
+                ...(userId && { users: { connect: { id: userId } } }),
                 ...(quantity && { quantity: parseFloat(quantity) }),
                 ...(date && { date }),
                 ...(status && { status }),
@@ -263,7 +296,12 @@ class WasteService {
                 ...(latitude && { latitude }),
                 ...(longitude && { longitude }),
                 ...(pricePerKg && { price_per_kg: pricePerKg }),
-                ...(form && { form }),
+                ...(formTemplateId !== undefined && {
+                    form_templates: formTemplateId
+                        ? { connect: { id: formTemplateId } }
+                        : { disconnect: true }
+                }),
+                ...(metrics !== undefined && { metrics }),
                 updatedat: new Date()
             }
         });

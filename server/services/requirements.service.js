@@ -1,5 +1,6 @@
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
+import { lookupSyncService } from './lookupSync.service.js';
 
 class RequirementsService {
     constructor(prisma) {
@@ -16,7 +17,9 @@ class RequirementsService {
             urgency,
             pricePerKg,
             latitude,
-            longitude
+            longitude,
+            formTemplateId,
+            metricsRange
         } = req.body;
 
         if ([userId, frpId].some(f => !f) || !estReqPerMonth)
@@ -33,10 +36,19 @@ class RequirementsService {
         if (!user_exists || !frp_exists)
             throw new ApiError(409, "Invalid input: user or frp does not exist");
 
+        // form_template_id is nullable on this entity by design — a requirement can be posted freeform
+        if (formTemplateId) {
+            const templateCheck = await this.prisma.$queryRaw`
+                select exists (select 1 from form_templates where id = ${formTemplateId}::uuid) as template_exists
+            `
+            if (!templateCheck[0].template_exists)
+                throw new ApiError(409, "invalid input for form template")
+        }
+
         const requirementEntry = await this.prisma.frp_requirements.create({
             data: {
-                u_id: userId,
-                frp_id: frpId,
+                users: { connect: { id: userId } },
+                frp: { connect: { id: frpId } },
                 est_req_per_month: estReqPerMonth,
                 act_req_per_month: actReqPerMonth ?? null,
                 date: date ?? null,
@@ -44,7 +56,9 @@ class RequirementsService {
                 urgency: urgency ?? null,
                 price_per_kg: pricePerKg ?? null,
                 latitude: latitude ?? null,
-                longitude: longitude ?? null
+                longitude: longitude ?? null,
+                ...(formTemplateId && { form_templates: { connect: { id: formTemplateId } } }),
+                metrics_range: metricsRange ?? {}
             }
         });
 
@@ -71,6 +85,7 @@ class RequirementsService {
                         resin: true
                     }
                 },
+                form_templates: true,
                 users: {
                     select: {
                         id: true,
@@ -118,6 +133,7 @@ class RequirementsService {
                         company_name: true
                     }
                 },
+                form_templates: true,
                 frp: {
                     include: {
                         composition: true,
@@ -176,6 +192,7 @@ class RequirementsService {
         const requirements = await this.prisma.frp_requirements.findMany({
             include: {
                 frp: { include: { composition: true, category: true, grade: true, resin: true } },
+                form_templates: true,
                 users: { select: { id: true, username: true } }
             }
         });
@@ -224,19 +241,22 @@ class RequirementsService {
     async updateRequirement(req) {
         const { id } = req.params;
         const updateData = req.body;
-        console.log(id);
-        console.log('---data---');
-        console.log(updateData);
-
-
 
         if (!id)
             throw new ApiError(400, "Requirement ID is required");
 
+        if (updateData?.formTemplateId) {
+            const templateCheck = await this.prisma.$queryRaw`
+            select exists (select 1 from form_templates where id = ${updateData.formTemplateId}::uuid) as template_exists
+        `
+            if (!templateCheck[0].template_exists)
+                throw new ApiError(409, "invalid input for form template")
+        }
+
         const updatedRequirement = await this.prisma.frp_requirements.update({
             where: { id: id },
             data: {
-                ...(updateData?.frpId && { frp_id: updateData.frpId }),
+                ...(updateData?.frpId && { frp: { connect: { id: updateData.frpId } } }),
                 ...(updateData?.estReqPerMonth !== undefined && { est_req_per_month: updateData.estReqPerMonth }),
                 ...(updateData?.actReqPerMonth !== undefined && { act_req_per_month: updateData.actReqPerMonth }),
                 ...(updateData?.status !== undefined && { status: updateData.status }),
@@ -244,14 +264,20 @@ class RequirementsService {
                 ...(updateData?.pricePerKg !== undefined && { price_per_kg: updateData.pricePerKg }),
                 ...(updateData?.latitude !== undefined && { latitude: updateData.latitude }),
                 ...(updateData?.longitude !== undefined && { longitude: updateData.longitude }),
-                // updatedat: new Date()
+                ...(updateData?.formTemplateId !== undefined && {
+                    form_templates: updateData.formTemplateId
+                        ? { connect: { id: updateData.formTemplateId } }
+                        : { disconnect: true }
+                }),
+                ...(updateData?.metricsRange !== undefined && { metrics_range: updateData.metricsRange }),
+                updatedat: new Date()
             }
         });
 
         if (!updatedRequirement)
             throw new ApiError(500, "Failed to update requirement entry");
         await lookupSyncService.syncLookupEntry('requirement', updatedRequirement.id);
-        return updatedRequirement;  
+        return updatedRequirement;
     }
 
     async deleteRequirement(req) {

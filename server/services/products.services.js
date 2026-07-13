@@ -9,7 +9,17 @@ class ProductService {
 
     async create(req) {
         const userId = req?.user?.id;
-        const { frpId, description, date, quantity, price, latitude, longitude, form } = req.body;
+        const {
+            frpId,
+            description,
+            date,
+            quantity,
+            price,
+            latitude,
+            longitude,
+            formTemplateId,
+            metrics
+        } = req.body;
 
         if ([userId, frpId].some(f => !f))
             throw new ApiError(400, "Missing required fields");
@@ -18,9 +28,17 @@ class ProductService {
         select exists (select 1 from frp where id = ${frpId}::uuid) as frp_exists
         `
         const { frp_exists } = results[0]
-
+        console.log('frp_exists:', frp_exists)
         if (!frp_exists)
             throw new ApiError(409, "invalid input for frp")
+
+        if (formTemplateId) {
+            const templateCheck = await this.prisma.$queryRaw`
+                select exists (select 1 from form_templates where id = ${formTemplateId}::uuid) as template_exists
+            `
+            if (!templateCheck[0].template_exists)
+                throw new ApiError(409, "invalid input for form template")
+        }
 
         const product = await this.prisma.products.create({
             data: {
@@ -32,7 +50,8 @@ class ProductService {
                 price: price ?? null,
                 latitude: latitude ?? null,
                 longitude: longitude ?? null,
-                form: form ?? null
+                ...(formTemplateId && { form_templates: { connect: { id: formTemplateId } } }),
+                metrics: metrics ?? {}
             }
         })
 
@@ -53,6 +72,7 @@ class ProductService {
                         resin: true
                     }
                 },
+                form_templates: true,
                 users: { select: { id: true, username: true } }
             }
         })
@@ -80,7 +100,8 @@ class ProductService {
                         resin: true
                     }
                 },
-                users: { select: { id: true, username: true, first_name:true, last_name:true, company_name:true } }
+                form_templates: true,
+                users: { select: { id: true, username: true, first_name: true, last_name: true, company_name: true } }
             }
         })
 
@@ -107,6 +128,7 @@ class ProductService {
                         resin: true
                     }
                 },
+                form_templates: true,
                 users: { select: { id: true, username: true } }
             }
         })
@@ -170,17 +192,30 @@ class ProductService {
         if (!Object.keys(updateData).length)
             throw new ApiError(400, "No update data provided");
 
+        if (updateData.formTemplateId) {
+            const templateCheck = await this.prisma.$queryRaw`
+            select exists (select 1 from form_templates where id = ${updateData.formTemplateId}::uuid) as template_exists
+        `
+            if (!templateCheck[0].template_exists)
+                throw new ApiError(409, "invalid input for form template")
+        }
+
         const updatedProduct = await this.prisma.products.update({
             where: { id: productId },
             data: {
-                ...(updateData.frpId && { frp_id: updateData.frpId }),
+                ...(updateData.frpId && { frp: { connect: { id: updateData.frpId } } }),
                 ...(updateData.description && { description: updateData.description }),
                 ...(updateData.date && { date: updateData.date }),
                 ...(updateData.quantity && { quantity: parseFloat(updateData.quantity) }),
                 ...(updateData.price && { price: parseFloat(updateData.price) }),
                 ...(updateData.latitude && { latitude: updateData.latitude }),
                 ...(updateData.longitude && { longitude: updateData.longitude }),
-                ...(updateData.form && { form: updateData.form }),
+                ...(updateData.formTemplateId !== undefined && {
+                    form_templates: updateData.formTemplateId
+                        ? { connect: { id: updateData.formTemplateId } }
+                        : { disconnect: true }
+                }),
+                ...(updateData.metrics !== undefined && { metrics: updateData.metrics }),
                 updatedat: new Date()
             }
         })

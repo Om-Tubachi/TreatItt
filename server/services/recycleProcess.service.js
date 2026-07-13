@@ -1,4 +1,4 @@
- 
+
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
 
@@ -21,10 +21,10 @@ class RecycleProcessService {
             throw new ApiError(400, "Missing required fields");
 
         const result = await this.prisma.$queryRaw`
-            SELECT
-                EXISTS(SELECT 1 FROM "recyclers"   WHERE u_id = ${userId}::uuid)  AS recycler_exists,
-                EXISTS(SELECT 1 FROM "treatments"  WHERE id   = ${treatmentId}::uuid) AS treatment_exists
-        `;
+        SELECT
+            EXISTS(SELECT 1 FROM "recyclers"   WHERE u_id = ${userId}::uuid)  AS recycler_exists,
+            EXISTS(SELECT 1 FROM "treatments"  WHERE id   = ${treatmentId}::uuid) AS treatment_exists
+    `;
 
         const { recycler_exists, treatment_exists } = result[0];
 
@@ -33,12 +33,14 @@ class RecycleProcessService {
 
         const recycleProcess = await this.prisma.recycler_processes.create({
             data: {
-                recycler_id: userId,
-                treatment_id: treatmentId,
-                capacity_kg: capacityKg,
+                recyclers: { connect: { u_id: userId } },
+                treatments: { connect: { id: treatmentId } },
                 schedules,
                 date,
-                charges
+                capability_metrics: {
+                    capacity_kg: capacityKg,
+                    charges: charges ?? null
+                }
             }
         });
 
@@ -100,72 +102,8 @@ class RecycleProcessService {
             method
         } = req.query;
 
-
-        // let treatmentIds;
-        // if (method) {
-        //     const matchingTreatments = await this.prisma.treatments.findMany({
-        //         where: {
-        //             treatment_processes: {
-        //                 treatment_methods: {
-        //                     method: { equals: method, mode: 'insensitive' }
-        //                 }
-        //             },
-        //             ...(frp && { frp_id: frp })
-        //         },
-        //         select: { id: true }
-        //     });
-
-        //     treatmentIds = matchingTreatments.map(t => t.id);
-
-        //     // no treatments matched — return empty rather than unfiltered results
-        //     if (!treatmentIds.length)
-        //         return [];
-        // } else if (frp) {
-        //     // filter by frp only, no method constraint
-        //     const matchingTreatments = await this.prisma.treatments.findMany({
-        //         where: { frp_id: frp },
-        //         select: { id: true }
-        //     });
-
-        //     treatmentIds = matchingTreatments.map(t => t.id);
-
-        //     if (!treatmentIds.length)
-        //         return [];
-        // }
-
-        // const recycleProcesses = await this.prisma.recycler_processes.findMany({
-        //     where: {
-        //         ...(treatmentIds && { treatment_id: { in: treatmentIds } }),
-        //         ...(capacity && { capacity_kg: { gte: parseFloat(capacity) } }),
-        //         ...(charges  && { charges:     { lte: parseFloat(charges)  } })
-        //     },
-        //     include: {
-        //         recyclers: true,
-        //         treatments: {
-        //             include: {
-        //                 treatment_processes: {
-        //                     include: {
-        //                         treatment_methods: true
-        //                     }
-        //                 },
-        //                 frp: {
-        //                     include: {
-        //                         category: true,
-        //                         grade:    true
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // });
-
-
-        // by method id, frp id
-
         const recycleProcesses = await this.prisma.recycler_processes.findMany({
             where: {
-                ...(capacity && { capacity_kg: { gte: parseFloat(capacity) } }),
-                ...(charges && { charges: { lte: parseFloat(charges) } }),
                 ...((frp || method) && {
                     treatments: {
                         ...(frp && { frp_id: frp }),
@@ -193,12 +131,17 @@ class RecycleProcessService {
             }
         });
 
+        const filtered = recycleProcesses.filter(p => {
+            const metrics = p.capability_metrics || {};
+            if (capacity && !(metrics.capacity_kg >= parseFloat(capacity))) return false;
+            if (charges && !(metrics.charges <= parseFloat(charges))) return false;
+            return true;
+        });
 
-
-        if (!recycleProcesses.length)
+        if (!filtered.length)
             throw new ApiError(404, "No recycle processes found for the given filters");
 
-        return recycleProcesses;
+        return filtered;
     }
 
     async updateRecycleProcess(req) {
@@ -208,9 +151,32 @@ class RecycleProcessService {
         if (!processId)
             throw new ApiError(400, "Process ID is required");
 
+        if (!updateData || !Object.keys(updateData).length)
+            throw new ApiError(400, "No update data provided");
+
+        const existing = await this.prisma.recycler_processes.findUnique({
+            where: { id: processId },
+            select: { capability_metrics: true }
+        });
+
+        if (!existing)
+            throw new ApiError(404, "Recycle process does not exist");
+
+        const mergedMetrics = {
+            ...(existing.capability_metrics || {}),
+            ...(updateData.capacityKg !== undefined && { capacity_kg: updateData.capacityKg }),
+            ...(updateData.charges !== undefined && { charges: updateData.charges })
+        };
+
         const updatedProcess = await this.prisma.recycler_processes.update({
             where: { id: processId },
-            data: updateData
+            data: {
+                ...(updateData.treatmentId !== undefined && { treatments: { connect: { id: updateData.treatmentId } } }),
+                ...(updateData.schedules !== undefined && { schedules: updateData.schedules }),
+                ...(updateData.date !== undefined && { date: updateData.date }),
+                ...((updateData.capacityKg !== undefined || updateData.charges !== undefined) && { capability_metrics: mergedMetrics }),
+                updatedat: new Date()
+            }
         });
 
         if (!updatedProcess)
