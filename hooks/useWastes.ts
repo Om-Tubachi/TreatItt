@@ -6,7 +6,13 @@ export const useWasteById = (id: string, options = {}) =>
 
 export const useUploadWaste = () => {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: uploadWaste, onSuccess: () => qc.invalidateQueries({ queryKey: ['wastes'] }) });
+  return useMutation({
+    mutationFn: uploadWaste,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['waste', 'all'] });
+      qc.invalidateQueries({ queryKey: ['wastes'] });
+    },
+  });
 };
 
 export const useUpdateWaste = () => {
@@ -14,6 +20,7 @@ export const useUpdateWaste = () => {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: any }) => updateWaste(id, body),
     onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: ['waste', 'all'] });
       qc.invalidateQueries({ queryKey: ['wastes'] });
       qc.invalidateQueries({ queryKey: ['wastes', id] });
     },
@@ -22,7 +29,13 @@ export const useUpdateWaste = () => {
 
 export const useDeleteWaste = () => {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (id: string) => deleteWaste(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['wastes'] }) });
+  return useMutation({
+    mutationFn: (id: string) => deleteWaste(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['waste', 'all'] });
+      qc.invalidateQueries({ queryKey: ['wastes'] });
+    },
+  });
 };
 
 export const useWasteEntriesOfUser = (userId: string, options = {}) =>
@@ -34,7 +47,7 @@ export const useWasteEntriesOfUser = (userId: string, options = {}) =>
 
 export const useAllWaste = (options = {}) => {
   return useQuery({
-    queryKey: ['waste', 'all'],
+    queryKey: ['wastes', 'all'],
     queryFn: () => getAllWasteListings(),
     ...options,
   });

@@ -6,6 +6,7 @@ export interface Lookups {
   categories: Record<string, { id: string; label: string }>;
   grades: Record<string, { id: string; label: string }>;
   resins: Record<string, { id: string; label: string }>;
+   rawEntries: any[];
 }
 
 export const useFrp = () =>
@@ -20,6 +21,7 @@ export const useFrp = () =>
         categories: {},
         grades: {},
         resins: {},
+        rawEntries: data,
       };
 
       data.forEach((entry) => {
