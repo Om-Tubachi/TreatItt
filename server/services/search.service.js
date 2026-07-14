@@ -248,6 +248,8 @@ class SearchService {
             // one pin per user: find distinct u_ids matching the entity/layer2/metric
             // filters, then fetch their own lat/long from `users` (not the listing's)
             const lookupWhere = Prisma.join(clauses, ' AND ');
+            console.log(lookupWhere);
+            
             const uidRows = await this.prisma.$queryRaw`
                 SELECT DISTINCT u_id FROM lookup_entries WHERE ${lookupWhere} AND u_id IS NOT NULL
             `;
@@ -266,7 +268,7 @@ class SearchService {
                 SELECT id, username, first_name, last_name, company_name, latitude, longitude
                 FROM users WHERE ${userWhere}
             `;
-
+            console.log(userWhere);
             return {
                 pins: users.map((u) => ({
                     kind: 'actor',
