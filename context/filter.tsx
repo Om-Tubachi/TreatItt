@@ -11,6 +11,8 @@ export interface MetricFilter {
 
 export interface FilterState {
   entityTypes: EntityType[];
+  mode: 'entity' | 'actor'; // 'actor' = one pin per user (map ribbon), 'entity' = one per listing
+  near: { radiusKm: number } | null; // lat/lng merged in at request time from device location
   categoryId: string[];
   compositionId: string[];
   gradeId: string[];
@@ -24,6 +26,8 @@ export interface FilterState {
 
 const DEFAULT_FILTERS: FilterState = {
   entityTypes: ['product'],
+  mode: 'entity',
+  near: null,
   categoryId: [],
   compositionId: [],
   gradeId: [],
@@ -40,6 +44,8 @@ type Layer2Field = 'categoryId' | 'compositionId' | 'gradeId' | 'resinId';
 interface FilterContextType {
   filters: FilterState;
   setEntityTypes: (types: EntityType[]) => void;
+  setActorTypes: (types: EntityType[]) => void;
+  setNear: (near: FilterState['near']) => void;
   setLayer2: (field: Layer2Field, ids: string[]) => void;
   setMetric: (key: string, value: MetricFilter | undefined) => void;
   setRecency: (recency: FilterState['recency']) => void;
@@ -50,6 +56,8 @@ interface FilterContextType {
 const FilterContext = createContext<FilterContextType>({
   filters: DEFAULT_FILTERS,
   setEntityTypes: () => {},
+  setActorTypes: () => {},
+  setNear: () => {},
   setLayer2: () => {},
   setMetric: () => {},
   setRecency: () => {},
@@ -63,10 +71,13 @@ export const FilterProvider = ({ children }: { children: React.ReactNode }) => {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   const setEntityTypes = useCallback((types: EntityType[]) => {
-    // switching layer 1 invalidates layer 2/3 selections that may no longer apply
+    // Marketplace tabs — single-select, always entity mode (one pin/card per listing).
+    // Always resets mode explicitly so a prior Map-screen actor-mode selection
+    // doesn't bleed into Marketplace when the user navigates back.
     setFilters((f) => ({
       ...f,
       entityTypes: types,
+      mode: 'entity',
       categoryId: [],
       compositionId: [],
       gradeId: [],
@@ -75,6 +86,20 @@ export const FilterProvider = ({ children }: { children: React.ReactNode }) => {
       metrics: {},
       page: 1,
     }));
+  }, []);
+
+  const setActorTypes = useCallback((types: EntityType[]) => {
+    // Map ribbon — multi-select. Empty selection falls back to normal entity search.
+    setFilters((f) => ({
+      ...f,
+      entityTypes: types,
+      mode: types.length ? 'actor' : 'entity',
+      page: 1,
+    }));
+  }, []);
+
+  const setNear = useCallback((near: FilterState['near']) => {
+    setFilters((f) => ({ ...f, near, page: 1 }));
   }, []);
 
   const setLayer2 = useCallback((field: Layer2Field, ids: string[]) => {
@@ -101,7 +126,7 @@ export const FilterProvider = ({ children }: { children: React.ReactNode }) => {
   const activeFilterCount = useMemo(() => {
     return (
       filters.categoryId.length +
-      filters.compositionId.length +    
+      filters.compositionId.length +
       filters.gradeId.length +
       filters.resinId.length +
       Object.keys(filters.metrics).length +
@@ -110,8 +135,18 @@ export const FilterProvider = ({ children }: { children: React.ReactNode }) => {
   }, [filters]);
 
   const value = useMemo(
-    () => ({ filters, setEntityTypes, setLayer2, setMetric, setRecency, resetFilters, activeFilterCount }),
-    [filters, setEntityTypes, setLayer2, setMetric, setRecency, resetFilters, activeFilterCount]
+    () => ({
+      filters,
+      setEntityTypes,
+      setActorTypes,
+      setNear,
+      setLayer2,
+      setMetric,
+      setRecency,
+      resetFilters,
+      activeFilterCount,
+    }),
+    [filters, setEntityTypes, setActorTypes, setNear, setLayer2, setMetric, setRecency, resetFilters, activeFilterCount]
   );
 
   return <FilterContext.Provider value={value}>{children}</FilterContext.Provider>;

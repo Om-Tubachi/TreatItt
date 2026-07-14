@@ -71,6 +71,20 @@ function metricRangeClause(key, min, max) {
     return Prisma.sql`(${exactCond} OR (${rangeCond}))`;
 }
 
+/**
+ * Rough bounding-box prefilter — good enough at this scale. Exact distance +
+ * sort happens client-side on the (small) resulting set, no PostGIS needed yet.
+ */
+function nearClause(near) {
+    if (!near?.lat || !near?.lng || !near?.radiusKm) return null;
+    const latDelta = near.radiusKm / 111;
+    const lngDelta = near.radiusKm / (111 * Math.cos((near.lat * Math.PI) / 180));
+    return Prisma.sql`
+        latitude BETWEEN ${near.lat - latDelta} AND ${near.lat + latDelta}
+        AND longitude BETWEEN ${near.lng - lngDelta} AND ${near.lng + lngDelta}
+    `;
+}
+
 function buildLayer2Clauses(filters) {
     const clauses = [];
     if (filters.categoryId?.length) clauses.push(Prisma.sql`category_id = ANY(${filters.categoryId}::uuid[])`);
@@ -203,6 +217,89 @@ class SearchService {
 
         // preserve the order/relevance returned by the lookup query — `in` doesn't
         return rows.map((r) => byId.get(r.entity_id)).filter(Boolean);
+    }
+
+    /**
+     * Map pins — deliberately separate from search() rather than a flag on it:
+     * actor mode queries `users` (one pin per person), entity mode queries
+     * `lookup_entries` (one pin per listing). Different shape, no hydration
+     * either way, so it doesn't belong behind the same code path as search().
+     */
+    async searchPins(req) {
+        const filters = req.body ?? {};
+        const entityTypes = (filters.entityTypes ?? []).filter((t) => ENTITY_TYPES.includes(t));
+        if (!entityTypes.length) throw new ApiError(400, 'At least one valid entityType is required');
+
+        const allowedKeys = await this.resolveAllowedMetricKeys(entityTypes, filters.formTemplateId);
+        const clauses = [Prisma.sql`entity_type = ANY(${entityTypes}::text[])`, ...buildLayer2Clauses(filters)];
+
+        for (const [key, range] of Object.entries(filters.metrics ?? {})) {
+            if (!allowedKeys.has(key)) continue;
+            if (range?.min != null || range?.max != null) {
+                clauses.push(metricRangeClause(key, range.min ?? null, range.max ?? null));
+            } else if (range?.eq != null) {
+                clauses.push(Prisma.sql`extra_filters ->> ${key}::text = ${String(range.eq)}`);
+            } else if (Array.isArray(range?.in) && range.in.length) {
+                clauses.push(Prisma.sql`extra_filters ->> ${key}::text = ANY(${range.in.map(String)})`);
+            }
+        }
+
+        if (filters.mode === 'actor') {
+            // one pin per user: find distinct u_ids matching the entity/layer2/metric
+            // filters, then fetch their own lat/long from `users` (not the listing's)
+            const lookupWhere = Prisma.join(clauses, ' AND ');
+            const uidRows = await this.prisma.$queryRaw`
+                SELECT DISTINCT u_id FROM lookup_entries WHERE ${lookupWhere} AND u_id IS NOT NULL
+            `;
+            const uids = uidRows.map((r) => r.u_id);
+            if (!uids.length) return { pins: [] };
+
+            const userClauses = [
+                Prisma.sql`id = ANY(${uids}::uuid[])`,
+                Prisma.sql`latitude IS NOT NULL AND longitude IS NOT NULL`,
+            ];
+            const near = nearClause(filters.near);
+            if (near) userClauses.push(near);
+            const userWhere = Prisma.join(userClauses, ' AND ');
+
+            const users = await this.prisma.$queryRaw`
+                SELECT id, username, first_name, last_name, company_name, latitude, longitude
+                FROM users WHERE ${userWhere}
+            `;
+
+            return {
+                pins: users.map((u) => ({
+                    kind: 'actor',
+                    userId: u.id,
+                    username: u.username,
+                    displayName: [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username,
+                    company: u.company_name,
+                    latitude: u.latitude,
+                    longitude: u.longitude,
+                })),
+            };
+        }
+
+        // entity mode — one pin per listing, straight off lookup_entries
+        clauses.push(Prisma.sql`latitude IS NOT NULL AND longitude IS NOT NULL`);
+        const near = nearClause(filters.near);
+        if (near) clauses.push(near);
+        const where = Prisma.join(clauses, ' AND ');
+
+        const rows = await this.prisma.$queryRaw`
+            SELECT entity_type, entity_id, latitude, longitude
+            FROM lookup_entries WHERE ${where}
+        `;
+
+        return {
+            pins: rows.map((r) => ({
+                kind: 'entity',
+                entityType: r.entity_type,
+                entityId: r.entity_id,
+                latitude: r.latitude,
+                longitude: r.longitude,
+            })),
+        };
     }
 
     // layer-2 cascading options: given the current filter state, which category/

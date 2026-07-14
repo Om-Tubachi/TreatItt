@@ -37,6 +37,8 @@ model users {
   updatedat               DateTime?                 @default(now()) @db.Timestamp(6)
   deletedat               DateTime?                 @db.Timestamp(6)
   password                String?                   @db.VarChar(255)
+  latitude                Decimal?                  @db.Decimal
+  longitude               Decimal?                  @db.Decimal
   collector_consumers     collector_consumers[]
   collector_sources       collector_sources[]
   collectors              collectors[]

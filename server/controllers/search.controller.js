@@ -16,4 +16,11 @@ const getFacetOptions = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, facets, 'Facet options fetched successfully'));
 });
 
-export { getFacetOptions, search };
+const searchPins = asyncHandler(async (req, res) => {
+    const pins = await searchService.searchPins(req);
+    res
+        .status(200)
+        .json(new ApiResponse(200, pins, 'Map pins fetched successfully'));
+});
+
+export { getFacetOptions, search, searchPins };

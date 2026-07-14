@@ -8,6 +8,8 @@ import { useFrp } from '../../hooks/useFrp';
 interface Props {
   visible: boolean;
   onClose: () => void;
+  showActorLayer?: boolean; // top layer for actor toggles — map/discover only, hidden on Marketplace
+  showDistanceSlider?: boolean; // radius presets — map/discover only
 }
 
 // maps our EntityType values to the strings stored in form_templates.applies_to
@@ -18,8 +20,18 @@ const ENTITY_SCHEMA_KEY: Record<EntityType, string> = {
   recycling: 'recycling', // not backed by form_templates — see note below
 };
 
-export function FilterSheet({ visible, onClose }: Props) {
-  const { filters, setLayer2, setMetric, setRecency, resetFilters, activeFilterCount } = useFilters();
+const ACTOR_LABELS: Record<EntityType, string> = {
+  product: 'Product Owner',
+  waste: 'Waste Producer',
+  requirement: 'Consumer',
+  recycling: 'Recycler',
+};
+
+const RADIUS_PRESETS = [1, 5, 10, 25];
+
+export function FilterSheet({ visible, onClose, showActorLayer = false, showDistanceSlider = false }: Props) {
+  const { filters, setActorTypes, setNear, setLayer2, setMetric, setRecency, resetFilters, activeFilterCount } =
+    useFilters();
   const { data: frpLookups } = useFrp();
   const { data: templates } = useFormTemplates();
 
@@ -54,6 +66,12 @@ export function FilterSheet({ visible, onClose }: Props) {
       if (!(key in localMetrics)) setMetric(key, undefined);
     });
     onClose();
+  };
+
+  const toggleActor = (type: EntityType) => {
+    const current = filters.entityTypes;
+    const next = current.includes(type) ? current.filter((t) => t !== type) : [...current, type];
+    setActorTypes(next);
   };
 
   const toggleChip = (field: 'categoryId' | 'compositionId' | 'gradeId' | 'resinId', id: string) => {
@@ -107,6 +125,46 @@ export function FilterSheet({ visible, onClose }: Props) {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
+            {showActorLayer && (
+              <>
+                <Text style={styles.sectionLabel}>SHOW ON MAP</Text>
+                <View style={styles.chipRow}>
+                  {(Object.keys(ACTOR_LABELS) as EntityType[]).map((type) => {
+                    const active = filters.entityTypes.includes(type);
+                    return (
+                      <TouchableOpacity
+                        key={type}
+                        style={[styles.chip, active && styles.chipActive]}
+                        onPress={() => toggleActor(type)}
+                      >
+                        <Text style={[styles.chipText, active && styles.chipTextActive]}>{ACTOR_LABELS[type]}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </>
+            )}
+
+            {showDistanceSlider && (
+              <>
+                <Text style={styles.sectionLabel}>DISTANCE</Text>
+                <View style={styles.chipRow}>
+                  {RADIUS_PRESETS.map((km) => {
+                    const active = filters.near?.radiusKm === km;
+                    return (
+                      <TouchableOpacity
+                        key={km}
+                        style={[styles.chip, active && styles.chipActive]}
+                        onPress={() => setNear(active ? null : { radiusKm: km })}
+                      >
+                        <Text style={[styles.chipText, active && styles.chipTextActive]}>{km} km</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </>
+            )}
+
             {renderChipGroup('CATEGORY', frpLookups?.categories, 'categoryId')}
             {renderChipGroup('COMPOSITION', frpLookups?.compositions, 'compositionId')}
             {renderChipGroup('GRADE', frpLookups?.grades, 'gradeId')}
