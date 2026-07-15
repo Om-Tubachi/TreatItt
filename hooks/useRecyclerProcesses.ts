@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createRecyclerProcess, deleteRecyclerProcess, getAllRecyclerProcesses, updateRecyclerProcess } from '../services/recyclerProcesses';
+import { createRecyclerProcess, deleteRecyclerProcess, getAllRecyclerProcesses, getRecycleProcessesByRecycler, getRecyclerProcessById, updateRecyclerProcess } from '../services/recyclerProcesses';
 
 export const useAllRecyclerProcesses = (options = {}) =>
     useQuery({ queryKey: ['recycler-processes'], queryFn: getAllRecyclerProcesses, ...options });
@@ -21,3 +21,9 @@ export const useDeleteRecyclerProcess = () => {
     const qc = useQueryClient();
     return useMutation({ mutationFn: (id: string) => deleteRecyclerProcess(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['recycler-processes'] }) });
 };
+
+export const useRecyclerProcessById = (id: string, options = {}) =>
+    useQuery({ queryKey: ['recycler-processes', id], queryFn: () => getRecyclerProcessById(id), enabled: !!id, ...options });
+
+export const useRecycleProcessesByRecycler = (recyclerId: string, options = {}) =>
+    useQuery({ queryKey: ['recycler-processes', 'recycler', recyclerId], queryFn: () => getRecycleProcessesByRecycler(recyclerId), enabled: !!recyclerId, ...options })

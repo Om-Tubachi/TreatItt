@@ -14,9 +14,10 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 interface Props {
     item: RecyclingEntity;
     onPress?: () => void;
+    onUserPress?: () => void;
 }
 
-export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
+export const RecyclingCard: React.FC<Props> = ({ item, onPress, onUserPress }) => {
     const [expanded, setExpanded] = useState(false);
     const { data: templates } = useFormTemplates();
 
@@ -26,38 +27,40 @@ export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
         setExpanded(!expanded);
     };
 
-    // Extract structure backed cleanly by your backend relational paths
     const method = item.treatments?.treatment_processes?.treatment_methods?.method ?? '';
     const process = item.treatments?.treatment_processes?.process ?? '';
     const parameterSchema = item.treatments?.treatment_processes?.treatment_methods?.process_parameter_schema;
-    
+
     const formattedDetails = formatProcessDetails(item.process_details, parameterSchema);
     const readableSchedule = formatSchedule(item.schedules);
 
-    // Resolve structural accepted UUID form templates against current cached template array
     const resolvedForms = (item.accepted_form_ids ?? [])
         .map(id => templates?.find(t => t.id === id)?.form_name || null)
         .filter((name): name is string => !!name);
 
-    const hasExpandableContent = 
-        formattedDetails.length > 0 || 
-        (item.capability_metrics && Object.keys(item.capability_metrics).length > 0) || 
+    // capability_metrics is where these actually live per the schema — top-level charges/capacity_kg don't exist
+    const capacityKg = item.capability_metrics?.capacity_kg ?? item.capacity_kg;
+    const charges = item.capability_metrics?.charges ?? item.charges;
+
+    const recyclerUser = item.recyclers?.users;
+
+    const hasExpandableContent =
+        formattedDetails.length > 0 ||
+        (item.capability_metrics && Object.keys(item.capability_metrics).length > 0) ||
         resolvedForms.length > 0;
 
     return (
-        <TouchableOpacity 
-            style={styles.card} 
-            onPress={onPress} 
+        <TouchableOpacity
+            style={styles.card}
+            onPress={onPress}
             disabled={!onPress}
             activeOpacity={0.8}
         >
-            {/* Absolute Status Tracking Tag */}
             <View style={styles.statusContainer}>
                 <Badge label="AVAILABLE" variant="available" />
             </View>
 
             <View style={styles.content}>
-                {/* Header Information Grouping */}
                 <View style={styles.headerBlock}>
                     <Text style={styles.typeLabel}>RECYCLING SERVICE</Text>
                     <Text style={styles.title} numberOfLines={1}>
@@ -68,13 +71,22 @@ export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
                             Process Run: {process.toLowerCase()}
                         </Text>
                     ) : null}
+                    {recyclerUser && (
+                        <TouchableOpacity
+                            onPress={(e: any) => { e.stopPropagation(); onUserPress?.(); }}
+                            disabled={!onUserPress}
+                        >
+                            <Text style={styles.recyclerText} numberOfLines={1}>
+                                BY: {(recyclerUser.company_name || recyclerUser.username || '').toUpperCase()}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
-                {/* Collapsible Technical Spec Sub-System */}
                 {hasExpandableContent && (
                     <View style={styles.specificationsContainer}>
-                        <TouchableOpacity 
-                            onPress={toggleExpand} 
+                        <TouchableOpacity
+                            onPress={toggleExpand}
                             style={styles.toggleBtn}
                             activeOpacity={0.6}
                         >
@@ -85,7 +97,6 @@ export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
 
                         {expanded && (
                             <View style={styles.expandedContent}>
-                                {/* Process Schema Metric Rows */}
                                 {formattedDetails.map((detail, idx) => (
                                     <View key={idx} style={styles.detailRow}>
                                         <Text style={styles.detailLabel}>{detail.label}</Text>
@@ -93,7 +104,6 @@ export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
                                     </View>
                                 ))}
 
-                                {/* Capability Metrics Object Map Rendering */}
                                 {item.capability_metrics && Object.keys(item.capability_metrics).length > 0 && (
                                     <View style={styles.metricsContainer}>
                                         <Text style={styles.sectionLabel}>CAPABILITY METRICS</Text>
@@ -109,7 +119,6 @@ export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
                                     </View>
                                 )}
 
-                                {/* Form Templates Array Grouping */}
                                 {resolvedForms.length > 0 && (
                                     <View style={styles.formsContainer}>
                                         <Text style={styles.sectionLabel}>ACCEPTED COMPLIANCE FORMS</Text>
@@ -131,19 +140,18 @@ export const RecyclingCard: React.FC<Props> = ({ item, onPress }) => {
 
                 <View style={styles.divider} />
 
-                {/* Triple Column Footprint Elements */}
                 <View style={styles.footerRow}>
                     <View style={styles.statGroup}>
                         <Text style={styles.statLabel}>CHARGES / KG</Text>
                         <Text style={styles.price}>
-                            {item.charges ? `₹${item.charges}` : '—'}
+                            {charges ? `₹${charges}` : '—'}
                         </Text>
                     </View>
 
                     <View style={[styles.statGroup, { alignItems: 'center' }]}>
                         <Text style={styles.statLabel}>CAPACITY</Text>
                         <Text style={styles.statVal}>
-                            {item.capacity_kg ? `${item.capacity_kg} kg` : '—'}
+                            {capacityKg ? `${capacityKg} kg` : '—'}
                         </Text>
                     </View>
 
@@ -203,6 +211,12 @@ const styles = StyleSheet.create({
     subtitle: {
         fontFamily: typography.bodyMed,
         fontSize: 10.5,
+        color: colors.body,
+        marginTop: 2,
+    },
+    recyclerText: {
+        fontFamily: typography.body,
+        fontSize: 8.5,
         color: colors.body,
         marginTop: 2,
     },

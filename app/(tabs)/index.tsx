@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router'; // 1. Import useRouter
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import IconBell from '../../components/assets/icons/Bell.svg';
@@ -9,9 +10,9 @@ import IconRecycle from '../../components/assets/icons/RecycleHome.svg';
 import { appBg, card, colors, fontSize, layout, radius, typography } from '../../constants/theme';
 import { useAuth } from '../../context/auth';
 
-
 export default function HomeScreen() {
   const { user } = useAuth();
+  const router = useRouter(); // 2. Initialize the router
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -21,13 +22,15 @@ export default function HomeScreen() {
         <Logo width={40} height={40} />
         <View style={styles.headerRight}>
           <TouchableOpacity><IconBell width={22} height={22} /></TouchableOpacity>
-          <TouchableOpacity><IconProfile width={22} height={22} /></TouchableOpacity>
+          
+          {/* PROFILE BUTTON */}
+          <TouchableOpacity onPress={() => router.push(`/screens/profile/${user?.id}` as any)}>
+            <IconProfile width={22} height={22} />
+          </TouchableOpacity>
         </View>
       </View>
-      {
-        user && <Text style={styles.greeting}> Hi, {user?.first_name ?? user?.username}</Text>
-      }
       
+      {user && <Text style={styles.greeting}> Hi, {user?.first_name ?? user?.username}</Text>}
 
       {/* Location bar */}
       <View style={styles.locationBar}>
@@ -35,18 +38,24 @@ export default function HomeScreen() {
         <Text style={styles.locationText}>{user?.address ?? 'Set your location'}</Text>
       </View>
 
-      {/* Info card 1 */}
+      {/* FRP Guide Card */}
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>Discover the FRP Guide{'\n'}in app</Text>
-        <TouchableOpacity style={styles.checkoutBtn}>
+        <TouchableOpacity 
+          style={styles.checkoutBtn}
+          onPress={() => router.push('/screens/frp' as any)} // FRP Route
+        >
           <Text style={styles.checkoutText}>Check out</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Info card 2 */}
+      {/* Manufacturing Processes Card */}
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>Discover the Manufacturing{'\n'}processes</Text>
-        <TouchableOpacity style={styles.checkoutBtn}>
+        <TouchableOpacity 
+          style={styles.checkoutBtn}
+          onPress={() => router.push('/screens/mfg-process' as any)} // MFG Process Route
+        >
           <Text style={styles.checkoutText}>Check out</Text>
         </TouchableOpacity>
       </View>
@@ -56,7 +65,10 @@ export default function HomeScreen() {
         <View style={styles.promoLeft}>
           <Text style={styles.promoSub}>Recycle Today</Text>
           <Text style={styles.promoTitle}>Discover all Recycling{'\n'}Services</Text>
-          <TouchableOpacity style={styles.discoverBtn}>
+          <TouchableOpacity 
+            style={styles.discoverBtn}
+            onPress={() => router.push('/screens/recycling/index' as any)} // Recycling Route
+          >
             <Text style={styles.discoverText}>Discover</Text>
           </TouchableOpacity>
         </View>

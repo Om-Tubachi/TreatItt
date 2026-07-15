@@ -12,9 +12,10 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 interface Props {
     item: RequirementEntity;
     onPress: () => void;
+    onUserPress?: () => void;
 }
 
-export const RequirementCard: React.FC<Props> = ({ item, onPress }) => {
+export const RequirementCard: React.FC<Props> = ({ item, onPress, onUserPress }) => {
     const [expanded, setExpanded] = useState(false);
 
     const toggleExpand = (e: any) => {
@@ -35,18 +36,16 @@ export const RequirementCard: React.FC<Props> = ({ item, onPress }) => {
 
     return (
         <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-            {/* Remote Top Right Corner Tag / Badges */}
             <View style={styles.topRightContainer}>
                 {item.urgency && (
-                    <Badge 
-                        label={item.urgency.toUpperCase()} 
-                        variant={item.urgency.toLowerCase() === 'urgent' ? 'urgent' : 'outlined'} 
+                    <Badge
+                        label={item.urgency.toUpperCase()}
+                        variant={item.urgency.toLowerCase() === 'urgent' ? 'urgent' : 'outlined'}
                     />
                 )}
             </View>
 
             <View style={styles.content}>
-                {/* Header Section */}
                 <View style={styles.headerBlock}>
                     <Text style={styles.typeLabel}>REQUIREMENT</Text>
                     <Text style={styles.title} numberOfLines={1}>{primaryTitle}</Text>
@@ -54,13 +53,17 @@ export const RequirementCard: React.FC<Props> = ({ item, onPress }) => {
                         <Text style={styles.subtitle} numberOfLines={1}>{secondaryTitle}</Text>
                     ) : null}
                     {userCompany ? (
-                        <Text style={styles.companyText} numberOfLines={1}>
-                            BY: {userCompany.toUpperCase()}
-                        </Text>
+                        <TouchableOpacity
+                            onPress={(e: any) => { e.stopPropagation(); onUserPress?.(); }}
+                            disabled={!onUserPress}
+                        >
+                            <Text style={styles.companyText} numberOfLines={1}>
+                                BY: {userCompany.toUpperCase()}
+                            </Text>
+                        </TouchableOpacity>
                     ) : null}
                 </View>
 
-                {/* Collapsible Specs Container */}
                 <View style={styles.specificationsContainer}>
                     <TouchableOpacity onPress={toggleExpand} style={styles.toggleBtn} activeOpacity={0.6}>
                         <Text style={styles.toggleText}>
@@ -72,7 +75,6 @@ export const RequirementCard: React.FC<Props> = ({ item, onPress }) => {
 
                 <View style={styles.divider} />
 
-                {/* Bottom Triple Stats Row */}
                 <View style={styles.footerRow}>
                     <View style={styles.statGroup}>
                         <Text style={styles.statLabel}>PRICE / KG</Text>

@@ -20,6 +20,12 @@ class UserService {
         });
     }
 
+    async getUserById(userId) {
+    return this.prisma.users.findUnique({
+        where: { id: userId },
+        omit: { password: true, refresh_token: true }
+    });
+}
     async isPasswordCorrect(userId, password) {
         const user = await this.prisma.users.findUnique({ where: { id: userId } });
         return bcrypt.compare(password, user.password);

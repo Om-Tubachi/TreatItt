@@ -61,6 +61,7 @@ import {
 
 
 import {
+    getUserById,
     loginUser,
     loginWithGoogle,
     signupWithEmail,
@@ -132,8 +133,7 @@ export {
     getRequirementsByFrp, getRequirementsByUser, getSourcesByCollector, getSystemDefaults, getTreatmentById,
     getTreatmentProcessById,
     getTreatmentProcessesByRecycler,
-    getTreatmentsByRecycler,
-    getWasteById,
+    getTreatmentsByRecycler, getUserById, getWasteById,
     getWasteEntriesByFrp,
     getWasteEntriesOfUser,
     loginUser,
@@ -149,3 +149,4 @@ export {
 }
 
 export { getFacetOptions, search } from './search.controller.js'
+

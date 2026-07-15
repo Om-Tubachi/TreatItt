@@ -179,7 +179,7 @@ export default function MapScreen() {
 
         const path =
             selectedPin.kind === 'actor'
-                ? `/screens/actor/${selectedPin.userId}`
+                ? `/screens/profile/${selectedPin.userId}`
                 : `/screens/${selectedPin.entityType}/${selectedPin.entityId}`;
 
         setTimeout(() => {

@@ -52,17 +52,26 @@ class RecycleProcessService {
 
     async getRecycleProcessById(req) {
         const { processId } = req.params;
-
-        if (!processId)
-            throw new ApiError(400, "Process ID is required");
+        if (!processId) throw new ApiError(400, "Process ID is required");
 
         const recycleProcess = await this.prisma.recycler_processes.findUnique({
-            where: { id: processId }
+            where: { id: processId },
+            include: {
+                recyclers: {
+                    include: {
+                        users: { select: { id: true, username: true, first_name: true, last_name: true, company_name: true } }
+                    }
+                },
+                treatments: {
+                    include: {
+                        frp: { include: { composition: true, category: true, grade: true, resin: true } },
+                        treatment_processes: { include: { treatment_methods: true } }
+                    }
+                }
+            }
         });
 
-        if (!recycleProcess)
-            throw new ApiError(404, "Recycle process does not exist");
-
+        if (!recycleProcess) throw new ApiError(404, "Recycle process does not exist");
         return recycleProcess;
     }
 

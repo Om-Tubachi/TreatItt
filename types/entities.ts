@@ -105,4 +105,9 @@ export interface RecyclingEntity {
     createdat?: string;
     updatedat?: string;
     treatments?: TreatmentRelation;
+    recyclers?: {
+        id: string;
+        address?: string;
+        users?: { id: string; username: string; first_name?: string; last_name?: string; company_name?: string };
+    };
 }

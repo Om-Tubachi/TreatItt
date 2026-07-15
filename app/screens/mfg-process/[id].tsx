@@ -4,15 +4,17 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { DetailSheet } from '../../../components/layout/DetailSheet';
 import { SectionHeader } from '../../../components/molecules/SectionHeader';
 import { appBg, colors, fontSize, layout, typography } from '../../../constants/theme';
-import { useManufacturingProcesses } from '../../../hooks/useManufacturingProcesses';
+import { useManufacturingProcessById } from '../../../hooks/useManufacturingProcesses';
+
+const fmtDate = (d?: string) =>
+    d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
 export default function MfgProcessDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
-    const { data: processes = [] } = useManufacturingProcesses();
-    const item = processes.find((p: any) => p.id === id);
+    const { data: process, isLoading } = useManufacturingProcessById(id);
 
-    if (!item) return <View style={styles.screen} />;
+    if (isLoading || !process) return <View style={styles.screen} />;
 
     return (
         <View style={styles.screen}>
@@ -22,14 +24,19 @@ export default function MfgProcessDetailScreen() {
                 <View style={{ width: 24 }} />
             </View>
             <DetailSheet>
-                <SectionHeader title="Process" />
-                <Text style={styles.name}>{item.manufacturing_process_name}</Text>
-                {item.manufacturing_process_desc && (
-                    <>
+                <Text style={styles.name}>{process.manufacturing_process_name}</Text>
+
+                {process.manufacturing_process_desc && (
+                    <View>
                         <SectionHeader title="Description" />
-                        <Text style={styles.desc}>{item.manufacturing_process_desc}</Text>
-                    </>
+                        <Text style={styles.desc}>{process.manufacturing_process_desc}</Text>
+                    </View>
                 )}
+
+                <View>
+                    <SectionHeader title="Recorded" />
+                    <Text style={styles.meta}>{fmtDate(process.createdat)}</Text>
+                </View>
             </DetailSheet>
         </View>
     );
@@ -40,6 +47,7 @@ const styles = StyleSheet.create({
     header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: layout.screenPadH, paddingTop: 56, paddingBottom: 16 },
     back: { fontSize: 28, color: colors.black, marginRight: 8 },
     title: { flex: 1, textAlign: 'center', fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.black },
-    name: { fontFamily: typography.heading, fontSize: fontSize.lg, color: colors.black },
-    desc: { fontFamily: typography.body, fontSize: fontSize.sm, color: colors.black },
+    name: { fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.black, marginTop: 4 },
+    desc: { fontFamily: typography.body, fontSize: fontSize.sm, color: colors.body, lineHeight: 20 },
+    meta: { fontFamily: typography.body, fontSize: fontSize.sm, color: colors.body },
 });

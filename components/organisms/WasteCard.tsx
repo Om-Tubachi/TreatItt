@@ -12,12 +12,13 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 interface Props {
     item: WasteEntity;
     onPress: () => void;
+    onUserPress?: () => void;
 }
 
 const fmtDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
-export const WasteCard: React.FC<Props> = ({ item, onPress }) => {
+export const WasteCard: React.FC<Props> = ({ item, onPress, onUserPress }) => {
     const [expanded, setExpanded] = useState(false);
 
     const toggleExpand = (e: any) => {
@@ -36,19 +37,21 @@ export const WasteCard: React.FC<Props> = ({ item, onPress }) => {
 
     return (
         <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-            {/* Remote Top Right Corner Tag */}
-            <View style={styles.soldByContainer}>
+            <TouchableOpacity
+                style={styles.soldByContainer}
+                onPress={(e: any) => { e.stopPropagation(); onUserPress?.(); }}
+                disabled={!onUserPress}
+            >
                 <Text style={styles.soldByText} numberOfLines={1}>
                     SOLD BY: {item.users?.username?.toUpperCase() || 'UNKNOWN'}
                 </Text>
-            </View>
+            </TouchableOpacity>
 
             <View style={styles.imgBox}>
                 <Text style={styles.locationPin}>📍 —</Text>
             </View>
 
             <View style={styles.content}>
-                {/* Header Section */}
                 <View style={styles.headerBlock}>
                     <Text style={styles.title} numberOfLines={1}>{primaryTitle}</Text>
                     {secondaryTitle ? (
@@ -61,7 +64,6 @@ export const WasteCard: React.FC<Props> = ({ item, onPress }) => {
                     {item.form && <Text style={styles.form}>{item.form.toLowerCase()}</Text>}
                 </View>
 
-                {/* Collapsible Specs Container */}
                 <View style={styles.specificationsContainer}>
                     <TouchableOpacity onPress={toggleExpand} style={styles.toggleBtn} activeOpacity={0.6}>
                         <Text style={styles.toggleText}>
@@ -73,7 +75,6 @@ export const WasteCard: React.FC<Props> = ({ item, onPress }) => {
 
                 <View style={styles.divider} />
 
-                {/* Bottom Stats Row */}
                 <View style={styles.footerRow}>
                     <View style={styles.statGroup}>
                         <Text style={styles.statLabel}>PRICE / KG</Text>
