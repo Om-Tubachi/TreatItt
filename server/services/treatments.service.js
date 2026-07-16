@@ -1,6 +1,16 @@
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
 
+// §1.4 — shared shape so all four query sites stay in sync; used to be
+// { id: true, description: true } with no composition/category, which meant
+// aggregateRecyclerTreatments() on the frontend had nothing to tag FRP batches with.
+const FRP_SELECT = {
+    id: true,
+    description: true,
+    composition: { select: { composition_name: true } },
+    category: { select: { category_name: true } }
+};
+
 class TreatmentService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -44,12 +54,7 @@ class TreatmentService {
         const treatments = await this.prisma.treatments.findMany({
             select: {
                 id: true,
-                frp: {
-                    select: {
-                        id: true,
-                        description: true
-                    }
-                },
+                frp: { select: FRP_SELECT },
                 treatment_processes: {
                     select: {
                         process: true,
@@ -76,12 +81,7 @@ class TreatmentService {
             where: { id: treatmentId },
             select: {
                 id: true,
-                frp: {
-                    select: {
-                        id: true,
-                        description: true
-                    }
-                },
+                frp: { select: FRP_SELECT },
                 treatment_processes: {
                     select: {
                         process: true,
@@ -118,12 +118,7 @@ class TreatmentService {
             where: { recycler_id: recyclerId },
             select: {
                 id: true,
-                frp: {
-                    select: {
-                        id: true,
-                        description: true
-                    }
-                },
+                frp: { select: FRP_SELECT },
                 treatment_processes: {
                     select: {
                         process: true,
@@ -153,12 +148,7 @@ class TreatmentService {
             },
             select: {
                 id: true,
-                frp: {
-                    select: {
-                        id: true,
-                        description: true
-                    }
-                },
+                frp: { select: FRP_SELECT },
                 treatment_processes: {
                     select: {
                         process: true,

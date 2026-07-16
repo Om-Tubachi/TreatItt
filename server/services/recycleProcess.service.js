@@ -1,4 +1,3 @@
-
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
 
@@ -50,9 +49,14 @@ class RecycleProcessService {
         return recycleProcess;
     }
 
+    // §1.3 — fixed: previously had no include at all, so the detail screen (and
+    // anything relying on recyclers/users or treatments/frp shape) got bare FK ids.
+    // Now mirrors the include block already used in getAllRecycleProcesses.
     async getRecycleProcessById(req) {
         const { processId } = req.params;
-        if (!processId) throw new ApiError(400, "Process ID is required");
+
+        if (!processId)
+            throw new ApiError(400, "Process ID is required");
 
         const recycleProcess = await this.prisma.recycler_processes.findUnique({
             where: { id: processId },
@@ -65,13 +69,17 @@ class RecycleProcessService {
                 treatments: {
                     include: {
                         frp: { include: { composition: true, category: true, grade: true, resin: true } },
-                        treatment_processes: { include: { treatment_methods: true } }
+                        treatment_processes: {
+                            include: { treatment_methods: true }
+                        }
                     }
                 }
             }
         });
 
-        if (!recycleProcess) throw new ApiError(404, "Recycle process does not exist");
+        if (!recycleProcess)
+            throw new ApiError(404, "Recycle process does not exist");
+
         return recycleProcess;
     }
 
@@ -206,6 +214,7 @@ class RecycleProcessService {
 
         return { success: true, message: "Recycle process deleted" };
     }
+
     async getAllRecycleProcesses(req) {
         const processes = await this.prisma.recycler_processes.findMany({
             include: {

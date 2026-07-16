@@ -7,32 +7,30 @@ class FrpService {
     }
 
     async getFrp(req) {
-        const {
-            composition,
-            category,
-            grade,
-            resin
-        } = req.query;
-
-        const frpEntries = await prisma.frp.findMany({
-            where: {
-                ...(composition && { composition_id: composition }),
-                ...(category && { category_id: category }),
-                ...(grade && { grade_id: grade }),
-                ...(resin && { resin_id: resin })
-            },
+        const entries = await this.prisma.frp.findMany({
             include: {
                 composition: true,
                 category: true,
                 grade: true,
-                resin: true
+                resin: true,
+                // §3.2 — lets the frontend derive distinct treatment_methods.method per
+                // composition without extra round trips; useFrp()'s untouched `select`
+                // still forwards this through rawEntries since that field passes data
+                // through unmodified.
+                treatments: {
+                    include: {
+                        treatment_processes: {
+                            include: { treatment_methods: true }
+                        }
+                    }
+                }
             }
         });
 
-        if (!frpEntries.length)
+        if (!entries.length)
             throw new ApiError(404, "No FRP entries found");
 
-        return frpEntries;
+        return entries;
     }
 }
 
