@@ -1,8 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import IconBell from '../../components/assets/icons/Bell.svg';
-import IconMenu from '../../components/assets/icons/HamBurger.svg';
 import IconPin from '../../components/assets/icons/LocationPin.svg';
 import Logo from '../../components/assets/icons/Logo.svg';
 import IconProfile from '../../components/assets/icons/Profile.svg';
@@ -49,12 +47,10 @@ export default function HomeScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity><IconMenu width={22} height={22} /></TouchableOpacity>
-        <Logo width={40} height={40} />
+        <Logo width={55} height={55} />
         <View style={styles.headerRight}>
-          <TouchableOpacity><IconBell width={22} height={22} /></TouchableOpacity>
           <TouchableOpacity onPress={() => router.push(`/screens/profile/${user?.id}` as any)}>
-            <IconProfile width={22} height={22} />
+            <IconProfile width={40} height={40} />
           </TouchableOpacity>
         </View>
       </View>
@@ -174,10 +170,10 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: appBg },
   content: { paddingHorizontal: layout.screenPadH, paddingBottom: 40 },
 
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 56, paddingBottom: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 56, paddingBottom: 16 },
   menuIcon: { fontSize: 20 },
   logoPlaceholder: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary },
-  headerRight: { flexDirection: 'row', gap: 8 },
+  headerRight: { flexDirection: 'row', gap: 8, right:0, position:'absolute' , marginTop:50},
 
   greeting: { fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.black, marginBottom: 12 },
 

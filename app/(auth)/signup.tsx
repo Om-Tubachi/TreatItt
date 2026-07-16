@@ -21,7 +21,7 @@ function SignupScreen() {
     const { supabaseToken } = useLocalSearchParams<{ supabaseToken?: string }>();
     const isGoogle = !!supabaseToken;
 
-    const { signUp, signUpWithGoogle } = useAuth();
+    const { signUp, signInWithGoogle } = useAuth();
     const { data: industries = [], isLoading: industriesLoading } = useIndustries();
 
     const [step, setStep] = useState(1);
@@ -63,14 +63,6 @@ function SignupScreen() {
                 Alert.alert('Required', 'Email is required');
                 return false;
             }
-            if (!isGoogle && !password.trim()) {
-                Alert.alert('Required', 'Password is required');
-                return false;
-            }
-            if (!isGoogle && password !== confirm) {
-                Alert.alert('Mismatch', 'Passwords do not match');
-                return false;
-            }
         }
         return true;
     };
@@ -78,24 +70,54 @@ function SignupScreen() {
     const handleNext = () => {
         if (!validateStep()) return;
         if (step < TOTAL_STEPS) { setStep(s => s + 1); return; }
-        handleSubmit();
+        
+        handlePasswordSubmit();
     };
 
-    const handleSubmit = async () => {
+    const handlePasswordSubmit = async () => {
+        if (!password.trim()) {
+            Alert.alert('Required', 'Password is required');
+            return;
+        }
+        if (password !== confirm) {
+            Alert.alert('Mismatch', 'Passwords do not match');
+            return;
+        }
+
         setLoading(true);
         const payload = {
             username, fname, mname, lname,
             companyName, designation, frpIndustryId,
-            address, email, contactNum,
-            ...(isGoogle ? { accessToken: supabaseToken } : { password }),
+            address, email, contactNum, password
         };
 
-        const { error } = isGoogle
-            ? await signUpWithGoogle(payload)
-            : await signUp(payload);
-
+        const { error } = await signUp(payload);
         setLoading(false);
         if (error) { Alert.alert('Signup Failed', error); return; }
+        router.replace('/(tabs)');
+    };
+
+    const handleGoogleSignup = async () => {
+        if (!validateStep()) return;
+        setLoading(true);
+
+        const payload = {
+            username,
+            fname,
+            mname,
+            lname,
+            companyName,
+            designation,
+            frpIndustryId,
+            address,
+            email,
+            contactNum,
+        };
+
+        const { error } = await signInWithGoogle(payload);
+        
+        setLoading(false);
+        if (error) { Alert.alert('Google Signup Failed', error); return; }
         router.replace('/(tabs)');
     };
 
@@ -113,7 +135,7 @@ function SignupScreen() {
 
             {step === 1 && (
                 <View style={styles.stepContainer}>
-                    <Text style={styles.stepTitle}>Who are you?</Text>
+                    <Text style={step === 1 ? styles.stepTitle : styles.label}>Who are you?</Text>
                     <TextInput style={styles.input} placeholder="First name *" placeholderTextColor="#9ba1a6" value={fname} onChangeText={setFname} />
                     <TextInput style={styles.input} placeholder="Middle name" placeholderTextColor="#9ba1a6" value={mname} onChangeText={setMname} />
                     <TextInput style={styles.input} placeholder="Last name *" placeholderTextColor="#9ba1a6" value={lname} onChangeText={setLname} />
@@ -146,17 +168,32 @@ function SignupScreen() {
 
             {step === 3 && (
                 <View style={styles.stepContainer}>
-                    <Text style={styles.stepTitle}>
-                        {isGoogle ? 'Contact details' : 'Credentials'}
-                    </Text>
+                    <Text style={styles.stepTitle}>Credentials</Text>
                     <TextInput style={styles.input} placeholder="Email *" placeholderTextColor="#9ba1a6" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
                     <TextInput style={styles.input} placeholder="Contact number" placeholderTextColor="#9ba1a6" value={contactNum} onChangeText={setContactNum} keyboardType="phone-pad" />
-                    {!isGoogle && (
-                        <>
-                            <TextInput style={styles.input} placeholder="Password *" placeholderTextColor="#9ba1a6" value={password} onChangeText={setPassword} secureTextEntry />
-                            <TextInput style={styles.input} placeholder="Confirm password *" placeholderTextColor="#9ba1a6" value={confirm} onChangeText={setConfirm} secureTextEntry />
-                        </>
-                    )}
+                    
+                    <View style={styles.dividerContainer}>
+                        <View style={styles.dividerLine} />
+                        <Text style={styles.dividerText}>Sign Up with Password</Text>
+                        <View style={styles.dividerLine} />
+                    </View>
+
+                    <TextInput style={styles.input} placeholder="Password *" placeholderTextColor="#9ba1a6" value={password} onChangeText={setPassword} secureTextEntry />
+                    <TextInput style={styles.input} placeholder="Confirm password *" placeholderTextColor="#9ba1a6" value={confirm} onChangeText={setConfirm} secureTextEntry />
+                    
+                    <View style={styles.dividerContainer}>
+                        <View style={styles.dividerLine} />
+                        <Text style={styles.dividerText}>Or Use Google</Text>
+                        <View style={styles.dividerLine} />
+                    </View>
+
+                    <TouchableOpacity 
+                        style={styles.googleBtn} 
+                        onPress={handleGoogleSignup}
+                        disabled={loading}
+                    >
+                        <Text style={styles.googleBtnText}>Sign up with Google</Text>
+                    </TouchableOpacity>
                 </View>
             )}
 
@@ -166,17 +203,34 @@ function SignupScreen() {
                         <Text style={styles.backBtnText}>← Back</Text>
                     </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                    style={[styles.nextBtn, step === 1 && styles.nextBtnFull]}
-                    onPress={handleNext}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.nextBtnText}>{step === TOTAL_STEPS ? 'Create Account' : 'Next →'}</Text>
-                    )}
-                </TouchableOpacity>
+                
+                {!(step === TOTAL_STEPS) && (
+                    <TouchableOpacity
+                        style={[styles.nextBtn, step === 1 && styles.nextBtnFull]}
+                        onPress={handleNext}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.nextBtnText}>Next →</Text>
+                        )}
+                    </TouchableOpacity>
+                )}
+
+                {step === TOTAL_STEPS && (
+                    <TouchableOpacity
+                        style={styles.nextBtn}
+                        onPress={handlePasswordSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.nextBtnText}>Register with Password</Text>
+                        )}
+                    </TouchableOpacity>
+                )}
             </View>
 
             <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/(auth)/sign-in')}>
@@ -213,6 +267,21 @@ const styles = StyleSheet.create({
     loginLink: { marginTop: 24, alignItems: 'center' },
     loginText: { color: '#687076', fontSize: 14 },
     loginBold: { color: '#2ecc71', fontWeight: '600' },
+    dividerContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
+    dividerLine: { flex: 1, height: 1, backgroundColor: '#e0e0e0' },
+    dividerText: { fontSize: 12, color: '#9ba1a6', marginHorizontal: 10 },
+    googleBtn: {
+        height: 50,
+        backgroundColor: '#4285F4',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    googleBtnText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    }
 });
 
 export default SignupScreen;

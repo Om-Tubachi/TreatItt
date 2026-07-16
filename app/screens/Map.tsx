@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
 
-import IconFilter from '../../components/assets/icons/HamBurger.svg';
+import IconFilter from '../../components/assets/icons/Filter.svg';
 import IconSearch from '../../components/assets/icons/search.svg';
 import { FilterSheet } from '../../components/organisms/FilterSheet';
 import { MapInfoCard } from '../../components/organisms/MapinfoCard';
@@ -229,7 +229,7 @@ export default function MapScreen() {
                     />
                 </View>
                 <TouchableOpacity style={styles.filterBtn} onPress={() => setFilterSheetOpen(true)}>
-                    <IconFilter width={18} height={18} />
+                    <IconFilter width={25} height={25} />
                 </TouchableOpacity>
             </View>
 

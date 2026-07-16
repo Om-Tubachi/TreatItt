@@ -1,9 +1,11 @@
+// app/screens/recycling/index.tsx
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import IconFilter from '../../../components/assets/icons/Filter.svg';
 import { FilterSheet } from '../../../components/organisms/FilterSheet';
 import { RecyclingCard } from '../../../components/organisms/RecyclingCard';
-import { appBg, colors, fontSize, layout, typography } from '../../../constants/theme';
+import { appBg, card, colors, fontSize, layout, typography } from '../../../constants/theme';
 import { useFilters } from '../../../context/filter';
 import { useAllRecyclerProcesses } from '../../../hooks/useRecyclerProcesses';
 import { useSearch } from '../../../hooks/useSearch';
@@ -13,9 +15,6 @@ export default function RecyclingIndexScreen() {
     const { filters, setEntityTypes, activeFilterCount } = useFilters();
     const [filterVisible, setFilterVisible] = useState(false);
 
-    // §3.3 — recycling IS a valid search entityType (search.service.js HYDRATE_MODEL
-    // includes it), so lock the filter sheet's entity scope to 'recycling' on mount.
-    // setEntityTypes (not setActorTypes) — this is a card listing, not the map ribbon.
     useEffect(() => {
         setEntityTypes(['recycling']);
     }, []);
@@ -34,8 +33,8 @@ export default function RecyclingIndexScreen() {
                     <Text style={styles.back}>‹</Text>
                 </TouchableOpacity>
                 <Text style={styles.title}>Recycling Services</Text>
-                <TouchableOpacity onPress={() => setFilterVisible(true)}>
-                    <Text style={styles.filterIcon}>⚙︎</Text>
+                <TouchableOpacity style={styles.filterBtn} onPress={() => setFilterVisible(true)}>
+                    <IconFilter width={25} height={25} />
                 </TouchableOpacity>
             </View>
 
@@ -81,7 +80,7 @@ const styles = StyleSheet.create({
     backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'flex-start' },
     back: { fontSize: 32, color: colors.black, fontWeight: '300' },
     title: { flex: 1, textAlign: 'center', fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.black },
-    filterIcon: { fontSize: 20, color: colors.primaryDark, width: 40, textAlign: 'right' },
+    filterBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', borderWidth: card.borderWidth, borderColor: card.border },
     scrollContainer: { paddingHorizontal: layout.screenPadH, paddingBottom: 40, gap: 12 },
     centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: layout.screenPadH },
     errorText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: '#D9383A', textAlign: 'center' },

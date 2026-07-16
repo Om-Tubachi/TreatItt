@@ -2,8 +2,9 @@ import { useAllRecyclerProccesses } from '@/hooks/useRecyclers';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import IconCart from '../../components/assets/icons/cart.svg';
+import IconFilter from '../../components/assets/icons/Filter.svg';
 import IconSearch from '../../components/assets/icons/search.svg';
+import { FilterSheet } from '../../components/organisms/FilterSheet';
 import { ProductCard } from '../../components/organisms/ProductCard';
 import { RecyclingCard } from '../../components/organisms/RecyclingCard';
 import { RequirementCard } from '../../components/organisms/RequirementCard';
@@ -26,6 +27,7 @@ export default function MarketplaceScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('products');
   const [search, setSearch] = useState('');
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
   const { data: products = [] } = useAllProducts();
   const { data: wastes = [] } = useAllWaste();
@@ -89,20 +91,23 @@ export default function MarketplaceScreen() {
           <Text style={styles.back}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Market Place</Text>
-        <TouchableOpacity>
-          <IconCart width={22} height={22} />
-        </TouchableOpacity>
+
       </View>
 
-      <View style={styles.searchBar}>
-        <IconSearch width={18} height={18} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search scrap rate"
-          placeholderTextColor={colors.placeholder}
-          value={search}
-          onChangeText={setSearch}
-        />
+      <View style={styles.searchRow}>
+        <View style={styles.searchBar}>
+          <IconSearch width={18} height={18} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search scrap rate"
+            placeholderTextColor={colors.placeholder}
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+        <TouchableOpacity style={styles.filterBtn} onPress={() => setFilterSheetOpen(true)}>
+          <IconFilter width={25} height={25} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.tabRow}>
@@ -127,6 +132,13 @@ export default function MarketplaceScreen() {
         showsVerticalScrollIndicator={false}
         extraData={activeTab}
       />
+
+      <FilterSheet
+        visible={filterSheetOpen}
+        onClose={() => setFilterSheetOpen(false)}
+        showActorLayer={false}
+        showDistanceSlider={false}
+      />
     </View>
   );
 }
@@ -136,8 +148,10 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: layout.screenPadH, paddingTop: 56, paddingBottom: 16 },
   back: { fontSize: 28, color: colors.black, marginRight: 8, lineHeight: 28 },
   title: { flex: 1, textAlign: 'center', fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.black },
-  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.xl, marginHorizontal: layout.screenPadH, paddingHorizontal: 14, paddingVertical: 10, gap: 8, borderWidth: card.borderWidth, borderColor: card.border, marginBottom: 16 },
+  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: layout.screenPadH, marginBottom: 16 },
+  searchBar: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.xl, paddingHorizontal: 14, paddingVertical: 10, gap: 8, borderWidth: card.borderWidth, borderColor: card.border },
   searchInput: { flex: 1, fontFamily: typography.body, fontSize: fontSize.sm, color: colors.black },
+  filterBtn: { width: 40, height: 40, borderRadius: radius.xl, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', borderWidth: card.borderWidth, borderColor: card.border },
   tabRow: { flexDirection: 'row', gap: 8, paddingHorizontal: layout.screenPadH, marginBottom: 16, flexWrap: 'wrap' },
   tab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.primary },
   tabActive: { backgroundColor: colors.primary },

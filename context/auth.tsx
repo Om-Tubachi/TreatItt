@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
+import * as Linking from 'expo-linking';
 import { useRouter } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from "expo-web-browser";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Linking, Platform } from "react-native";
+import { Platform } from "react-native";
 import { api, setToken } from "../lib/api";
 import { GoogleSignUpData, SignUpData, User } from '../types/auth';
 
@@ -12,7 +13,6 @@ WebBrowser.maybeCompleteAuthSession();
 const TOKEN_KEY = 'accessToken';
 
 const persistToken = async (token: string) => {
-  
   setToken(token);
   if (Platform.OS !== 'web') await SecureStore.setItemAsync(TOKEN_KEY, token);
 };
@@ -27,7 +27,7 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (data: SignUpData) => Promise<{ error: string | null }>;
-  signInWithGoogle: () => Promise<{ error: string | null; supabaseToken?: string }>;
+  signInWithGoogle: (signUpData?: Omit<GoogleSignUpData, 'accessToken'>) => Promise<{ error: string | null; supabaseToken?: string }>;
   signUpWithGoogle: (data: GoogleSignUpData) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
@@ -92,13 +92,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-
       const res = await api.post("/users/auth/login", { email, password });
       await persistToken(res.data.data.accessToken);
       setUser(res.data.data.user);
       return { error: null };
     } catch (err: any) {
-      
       return { error: err.response?.data?.message || "Login failed" };
     } finally {
       setIsLoading(false);
@@ -119,7 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (signUpData?: Omit<GoogleSignUpData, 'accessToken'>) => {
     try {
       setIsLoading(true);
       if (Platform.OS === 'web') {
@@ -130,12 +128,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (error) throw error;
         return { error: null };
       }
-
+      
       const redirectUri = Linking.createURL("/");
+      console.log("[GOOGLE AUTH] Redirecting to:", redirectUri);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: redirectUri, skipBrowserRedirect: true },
       });
+      
       if (error) throw error;
 
       if (data?.url) {
@@ -144,13 +145,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const urlObj = new URL(result.url.replace("#", "?"));
           const supabaseToken = urlObj.searchParams.get("access_token");
           if (!supabaseToken) throw new Error("No token received from Google");
+          
+          console.log("[GOOGLE AUTH] Obtained Supabase token:", supabaseToken);
 
+          // CASE A: Direct Google Sign-Up submission matching backend expectation
+          if (signUpData) {
+            try {
+              console.log("[GOOGLE AUTH] Triggering backend registration...");
+              const res = await api.post("/users/auth/signup/google", {
+                ...signUpData,
+                accessToken: supabaseToken,
+              });
+              await persistToken(res.data.data.accessToken);
+              setUser(res.data.data.user);
+              return { error: null };
+            } catch (signupErr: any) {
+              console.log("[GOOGLE AUTH] Backend registration error:", signupErr.response?.data);
+              return { error: signupErr.response?.data?.message || "Google registration failed" };
+            }
+          }
+
+          // CASE B: Standard Google Sign-In check
           try {
+            console.log("[GOOGLE AUTH] Triggering backend login check...");
             const res = await api.post("/users/auth/login/google", { supabaseAccessToken: supabaseToken });
             await persistToken(res.data.data.accessToken);
             setUser(res.data.data.user);
             return { error: null };
           } catch (loginErr: any) {
+            console.log("[GOOGLE AUTH] Backend login error:", loginErr.response?.data);
             if (loginErr.response?.status === 400) return { error: null, supabaseToken };
             throw loginErr;
           }
