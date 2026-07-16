@@ -1,5 +1,5 @@
 import Router from 'express'
-import { getUserById, loginUser, loginWithGoogle, signupWithEmail, signupWithGoogle } from '../controllers/index.js'
+import { getUserById, loginUser, loginWithGoogle, searchUsers, signupWithEmail, signupWithGoogle } from '../controllers/index.js'
 import { prisma } from '../db/prisma.js'
 import { verifyJWT } from '../middlewares/auth.middleware.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
@@ -36,6 +36,7 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 router.route('/auth/me').get(verifyJWT, getMe)
+router.route('/search').get(searchUsers);
 
 router.route('/:userId').get(getUserById)
 
