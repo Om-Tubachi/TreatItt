@@ -73,7 +73,7 @@ export default function RequirementDetailScreen() {
                     </View>
                 </View>
 
-                <FrpPills frp={req?.frp} />
+                <FrpPills frp={req?.frp} expanded={false} />
 
                 <View style={styles.statsRow}>
                     <StatBox label="EST REQ/MONTH" value={req?.est_req_per_month ? `${req.est_req_per_month} kg` : '—'} />
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     price: { fontFamily: typography.heading, fontSize: fontSize.xl, color: colors.primaryDark },
     ownerControls: { flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 16 },
     controlBtn: { flex: 1, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-    editBtn: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.border || '#E5E7EB' },
+    editBtn: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.black || '#E5E7EB' },
     editBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: colors.black },
     deleteBtn: { backgroundColor: '#FEE2E2' },
     deleteBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: '#EF4444' },

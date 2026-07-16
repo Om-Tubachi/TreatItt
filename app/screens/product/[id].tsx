@@ -62,7 +62,7 @@ export default function ProductDetailScreen() {
 
 
                 <Text style={styles.soldBy}>SOLD BY: {product?.users?.username?.toUpperCase()}</Text>
-                <FrpPills frp={product?.frp} />
+                <FrpPills frp={product?.frp} expanded={false} />
 
                 {product?.form && <Text style={styles.form}>{product.form}</Text>}
 
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     sectionValue: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: colors.black },
     ownerControls: { flexDirection: 'row', gap: 10, marginBottom: 16 },
     controlBtn: { flex: 1, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-    editBtn: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.border || '#E5E7EB' },
+    editBtn: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.black || '#E5E7EB' },
     editBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: colors.black },
     deleteBtn: { backgroundColor: '#FEE2E2' },
     deleteBtnText: { fontFamily: typography.bodyMed, fontSize: fontSize.sm, color: '#EF4444' },
