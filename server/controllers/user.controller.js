@@ -284,6 +284,20 @@ const loginWithGoogle = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, { user: loggedInUser, accessToken, refreshToken }, "User logged in successfully using Google"));
 });
 
+const searchUsers = asyncHandler(async (req, res) => {
+    const { q, limit } = req.query;
+    const users = await userService.searchByUsername(q, limit ? parseInt(limit) : undefined);
+    const withBadges = users.map(u => ({
+        ...u,
+        badges: [
+            u.recyclers && 'Recycler',
+            u.manufacturing_processes?.length && 'Manufacturer',
+            u.frp_requirements?.length && 'Buyer',
+        ].filter(Boolean)
+    }));
+    res.status(200).json(new ApiResponse(200, withBadges, "Users retrieved successfully"));
+});
+
 // const loginWithGoogle = asyncHandler(
 //     async (req, res) => {
 //         const { supabaseAccessToken } = req.body
@@ -346,7 +360,7 @@ const loginWithGoogle = asyncHandler(async (req, res) => {
 
 
 export {
-    getUserById, loginUser, loginWithGoogle, signupWithEmail,
+    getUserById, loginUser, loginWithGoogle, searchUsers, signupWithEmail,
     signupWithGoogle
 };
 

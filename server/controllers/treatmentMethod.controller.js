@@ -6,3 +6,8 @@ export const getAllTreatmentMethods = asyncHandler(async (req, res) => {
     const data = await treatmentMethodService.getAllTreatmentMethods();
     res.json(new ApiResponse(200, data, "Treatment methods fetched"));
 });
+
+export const getTreatmentMethodAggregates = asyncHandler(async (req, res) => {
+    const data = await treatmentMethodService.getTreatmentMethodAggregates();
+    res.json(new ApiResponse(200, data, "Treatment method aggregates fetched"));
+});

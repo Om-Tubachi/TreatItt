@@ -8,12 +8,14 @@ import { getFrp } from './frp.controller.js'
 import {
     createManufacturingProcess,
     deleteManufacturingProcess,
+    getFilteredManufacturingProcesses,
     getManufacturingProcessById,
     getManufacturingProcessesByUser,
+    getManufacturingProcessStats,
     getSystemDefaults,
     updateManufacturingProcess
 } from './manufacturingProcess.controller.js'
-import { getAllTreatmentMethods } from './treatmentMethod.controller.js'
+import { getAllTreatmentMethods, getTreatmentMethodAggregates } from './treatmentMethod.controller.js'
 
 import {
     createRecycleProcess,
@@ -64,6 +66,7 @@ import {
     getUserById,
     loginUser,
     loginWithGoogle,
+    searchUsers,
     signupWithEmail,
     signupWithGoogle
 } from './user.controller.js'
@@ -123,15 +126,13 @@ export {
     getAllWasteEntries,
     getCollectorById,
     getCollectorsByProximity,
-    getConsumersByCollector,
-    getFilteredProducts, getFilteredRecycleProcesses, getFilteredRecyclers, getFilteredRequirements, getFilteredTreatments,
+    getConsumersByCollector, getFilteredManufacturingProcesses, getFilteredProducts, getFilteredRecycleProcesses, getFilteredRecyclers, getFilteredRequirements, getFilteredTreatments,
     getFilteredWaste, getFrp, getManufacturingProcessById,
-    getManufacturingProcessesByUser, getProductById,
+    getManufacturingProcessesByUser, getManufacturingProcessStats, getProductById,
     getProductsByFrp,
     getProductsByUser, getRecycleProcessById,
     getRecycleProcessesByRecycler, getRecyclerById, getRequirementById,
-    getRequirementsByFrp, getRequirementsByUser, getSourcesByCollector, getSystemDefaults, getTreatmentById,
-    getTreatmentProcessById,
+    getRequirementsByFrp, getRequirementsByUser, getSourcesByCollector, getSystemDefaults, getTreatmentById, getTreatmentMethodAggregates, getTreatmentProcessById,
     getTreatmentProcessesByRecycler,
     getTreatmentsByRecycler, getUserById, getWasteById,
     getWasteEntriesByFrp,
@@ -139,8 +140,7 @@ export {
     loginUser,
     loginWithGoogle,
     registerCollector,
-    registerRecycler,
-    signupWithEmail,
+    registerRecycler, searchUsers, signupWithEmail,
     signupWithGoogle,
     updateCollector, updateManufacturingProcess, updateProduct, updateRecycleProcess, updateRequirement, updateTreatment,
     updateTreatmentProcess,

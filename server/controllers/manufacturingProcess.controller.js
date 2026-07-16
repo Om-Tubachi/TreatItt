@@ -38,6 +38,24 @@ const getManufacturingProcessesByUser = asyncHandler(
     }
 );
 
+const getManufacturingProcessStats = asyncHandler(
+    async (req, res) => {
+        const stats = await manufacturingProcessService.getManufacturingProcessStats(req);
+        res
+            .status(200)
+            .json(new ApiResponse(200, stats, 'Manufacturing process stats retrieved successfully'));
+    }
+);
+
+const getFilteredManufacturingProcesses = asyncHandler(
+    async (req, res) => {
+        const manufacturingProcesses = await manufacturingProcessService.getFilteredManufacturingProcesses(req);
+        res
+            .status(200)
+            .json(new ApiResponse(200, manufacturingProcesses, 'Filtered manufacturing processes retrieved successfully'));
+    }
+);
+
 const updateManufacturingProcess = asyncHandler(
     async (req, res) => {
         const updatedProcess = await manufacturingProcessService.updateManufacturingProcess(req);
@@ -59,8 +77,10 @@ const deleteManufacturingProcess = asyncHandler(
 export {
     createManufacturingProcess,
     deleteManufacturingProcess,
+    getFilteredManufacturingProcesses,
     getManufacturingProcessById,
     getManufacturingProcessesByUser,
+    getManufacturingProcessStats,
     getSystemDefaults,
     updateManufacturingProcess
 };
