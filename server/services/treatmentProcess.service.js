@@ -1,6 +1,11 @@
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
 
+const INCLUDE = {
+    treatment_methods: true,
+    users: { select: { id: true, username: true, first_name: true, last_name: true, company_name: true } }
+};
+
 class TreatmentProcessService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -15,8 +20,8 @@ class TreatmentProcessService {
 
         const result = await this.prisma.$queryRaw`
             SELECT
-                EXISTS(SELECT 1 FROM "recyclers"             WHERE u_id = ${recyclerId}::uuid) AS user_exists,
-                EXISTS(SELECT 1 FROM "treatment_methods" WHERE id = ${methodId}::uuid)  AS method_exists
+                EXISTS(SELECT 1 FROM "recyclers"         WHERE u_id = ${recyclerId}::uuid) AS user_exists,
+                EXISTS(SELECT 1 FROM "treatment_methods" WHERE id   = ${methodId}::uuid)   AS method_exists
         `;
 
         const { user_exists, method_exists } = result[0];
@@ -29,7 +34,8 @@ class TreatmentProcessService {
                 recycler_id: recyclerId,
                 method_id:   methodId,
                 process
-            }
+            },
+            include: INCLUDE
         });
 
         if (!treatmentProcess)
@@ -39,7 +45,7 @@ class TreatmentProcessService {
     }
 
     async getAllTreatmentProcesses(req) {
-        const treatmentProcesses = await this.prisma.treatment_processes.findMany();
+        const treatmentProcesses = await this.prisma.treatment_processes.findMany({ include: INCLUDE });
 
         if (!treatmentProcesses.length)
             throw new ApiError(500, "Something went wrong while fetching treatment processes");
@@ -53,7 +59,8 @@ class TreatmentProcessService {
         if (!tpId) throw new ApiError(400, "Treatment process ID is required");
 
         const treatmentProcess = await this.prisma.treatment_processes.findUnique({
-            where: { id: tpId }
+            where: { id: tpId },
+            include: INCLUDE
         });
 
         if (!treatmentProcess) throw new ApiError(404, "Treatment process not found");
@@ -78,7 +85,8 @@ class TreatmentProcessService {
         if (!has_processes) throw new ApiError(404, "No treatment processes found for this recycler");
 
         const treatmentProcesses = await this.prisma.treatment_processes.findMany({
-            where: { recycler_id: recyclerId }
+            where: { recycler_id: recyclerId },
+            include: INCLUDE
         });
 
         if (!treatmentProcesses.length)
@@ -95,7 +103,8 @@ class TreatmentProcessService {
 
         const updatedProcess = await this.prisma.treatment_processes.update({
             where: { id: tpId },
-            data: updateData
+            data: updateData,
+            include: INCLUDE
         });
 
         if (!updatedProcess)

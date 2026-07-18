@@ -80,6 +80,12 @@ export function SignInForm({ onSubmit, onGoogleSubmit, loading, gLoading }: Sign
         loading={gLoading}
         disabled={anyLoading}
       />
+      <Button
+        label="Forgot password"
+        variant="outlined"
+        onPress={() => router.push(`/(auth)/forgot-password`)}
+        
+      />
 
       {/* Redirection Links Footer */}
       <View style={styles.footer}>

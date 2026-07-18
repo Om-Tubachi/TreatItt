@@ -6,7 +6,7 @@ export interface FrpShape {
     category_id?: string;
     grade_id?: string;
     resin_id?: string;
-    composition?: { composition_name: string };
+    composition?: { composition_name: string; composition_description?: string };
     category?: { category_name: string };
     grade?: { grade_name: string };
     resin?: { resin_name: string };
@@ -22,7 +22,7 @@ export interface ProductEntity {
     quantity?: number;
     form?: string;
     date?: string;
-    metrics?: Record<string, any>; // Stored raw exact user metrics matching template specifications
+    metrics?: Record<string, any>;
     form_template_id?: string | null;
     createdat?: string;
     updatedat?: string;
@@ -40,12 +40,18 @@ export interface WasteEntity {
     date?: string;
     lifecycle_stage?: string;
     status?: string;
-    metrics?: Record<string, any>; // Stored raw exact user metrics matching template specifications
+    metrics?: Record<string, any>;
     form_template_id?: string | null;
     createdat?: string;
     updatedat?: string;
     frp?: FrpShape;
     users?: { id: string; username: string };
+    collectors?: { id: string; address?: string } | null;
+    manufacturing_processes?: {
+        id: string;
+        manufacturing_process_name?: string;
+        users?: { id: string; username: string };
+    } | null;
 }
 
 export interface RequirementEntity {
@@ -58,24 +64,23 @@ export interface RequirementEntity {
     urgency?: string;
     status?: string;
     date?: string;
-    metrics_range?: Record<string, { min?: number; max?: number }>; // Stored user range bounds
+    metrics_range?: Record<string, { min?: number; max?: number }>;
     form_template_id?: string | null;
     createdat?: string;
     updatedat?: string;
     frp?: FrpShape;
-    users?: { 
-        id: string; 
-        username: string; 
-        first_name?: string; 
-        last_name?: string; 
-        company_name?: string; 
+    users?: {
+        id: string;
+        username: string;
+        first_name?: string;
+        last_name?: string;
+        company_name?: string;
     };
 }
 
 export interface TreatmentMethod {
     id: string;
     method: string;
-    // Schema definitions loaded dynamically into the processDetailsFormatter
     process_parameter_schema?: MetricFieldSchema[] | null;
 }
 
@@ -98,9 +103,9 @@ export interface RecyclingEntity {
     treatment_id?: string;
     capacity_kg?: number;
     charges?: number;
-    schedules?: string; // Stringified object/array mapping processed safely by formatSchedule
-    process_details?: Record<string, any> | null; // Dynamic values evaluated against parameter schema
-    accepted_form_ids?: string[] | null; // Array of compliance FormTemplate UUID structural keys
+    schedules?: string;
+    process_details?: Record<string, any> | null;
+    accepted_form_ids?: string[] | null;
     capability_metrics?: Record<string, any> | null;
     createdat?: string;
     updatedat?: string;
@@ -110,4 +115,52 @@ export interface RecyclingEntity {
         address?: string;
         users?: { id: string; username: string; first_name?: string; last_name?: string; company_name?: string };
     };
+}
+
+export interface User {
+    id: string;
+    username: string;
+    first_name: string;
+    middle_name?: string;
+    last_name: string;
+    company_name?: string;
+    designation?: string;
+    email: string;
+    contact_number?: string;
+    frp_industry_id?: string;
+    address?: string;
+    google_id?: string;
+    is_verified?: boolean;
+}
+
+export interface SignUpData {
+    username: string;
+    fname: string;
+    mname?: string;
+    lname: string;
+    companyName?: string;
+    designation?: string;
+    email: string;
+    contactNum?: string;
+    frpIndustryId: string;
+    address?: string;
+    password: string;
+    latitude?: number;
+    longitude?: number;
+}
+
+export interface GoogleSignUpData {
+    username: string;
+    fname: string;
+    mname?: string;
+    lname: string;
+    companyName?: string;
+    designation?: string;
+    email: string;
+    contactNum?: string;
+    frpIndustryId: string;
+    address?: string;
+    accessToken: string;
+    latitude?: number;
+    longitude?: number;
 }

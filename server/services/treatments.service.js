@@ -1,14 +1,33 @@
 import { prisma } from '../db/prisma.js';
 import { ApiError } from '../utils/ApiError.js';
 
-// §1.4 — shared shape so all four query sites stay in sync; used to be
-// { id: true, description: true } with no composition/category, which meant
-// aggregateRecyclerTreatments() on the frontend had nothing to tag FRP batches with.
 const FRP_SELECT = {
     id: true,
     description: true,
     composition: { select: { composition_name: true } },
     category: { select: { category_name: true } }
+};
+
+// recycler_id on `treatments` is the user's id directly — same convention as
+// treatment_processes and recycler_processes — so this is what powers the
+// "My Treatments" tab and card attribution on the picker screen
+const RECYCLER_SELECT = {
+    select: { id: true, username: true, first_name: true, last_name: true, company_name: true }
+};
+
+const TREATMENT_SELECT = {
+    id: true,
+    recycler_id: true,
+    frp: { select: FRP_SELECT },
+    users: RECYCLER_SELECT,
+    treatment_processes: {
+        select: {
+            process: true,
+            treatment_methods: {
+                select: { id: true, method: true }
+            }
+        }
+    }
 };
 
 class TreatmentService {
@@ -41,7 +60,8 @@ class TreatmentService {
                 recycler_id: recyclerId,
                 treatment_process_id: treatmentProcessId,
                 frp_id: frpId
-            }
+            },
+            select: TREATMENT_SELECT
         });
 
         if (!treatment)
@@ -51,20 +71,7 @@ class TreatmentService {
     }
 
     async getAllTreatments(req) {
-        const treatments = await this.prisma.treatments.findMany({
-            select: {
-                id: true,
-                frp: { select: FRP_SELECT },
-                treatment_processes: {
-                    select: {
-                        process: true,
-                        treatment_methods: {
-                            select: { method: true }
-                        }
-                    }
-                }
-            }
-        });
+        const treatments = await this.prisma.treatments.findMany({ select: TREATMENT_SELECT });
 
         if (!treatments.length)
             throw new ApiError(500, "Something went wrong while fetching treatments");
@@ -79,18 +86,7 @@ class TreatmentService {
 
         const treatment = await this.prisma.treatments.findUnique({
             where: { id: treatmentId },
-            select: {
-                id: true,
-                frp: { select: FRP_SELECT },
-                treatment_processes: {
-                    select: {
-                        process: true,
-                        treatment_methods: {
-                            select: { method: true }
-                        }
-                    }
-                }
-            }
+            select: TREATMENT_SELECT
         });
 
         if (!treatment) throw new ApiError(404, "Treatment not found");
@@ -116,18 +112,7 @@ class TreatmentService {
 
         const treatments = await this.prisma.treatments.findMany({
             where: { recycler_id: recyclerId },
-            select: {
-                id: true,
-                frp: { select: FRP_SELECT },
-                treatment_processes: {
-                    select: {
-                        process: true,
-                        treatment_methods: {
-                            select: { method: true }
-                        }
-                    }
-                }
-            }
+            select: TREATMENT_SELECT
         });
 
         if (!treatments.length)
@@ -146,18 +131,7 @@ class TreatmentService {
                     treatment_processes: { method_id: method }
                 })
             },
-            select: {
-                id: true,
-                frp: { select: FRP_SELECT },
-                treatment_processes: {
-                    select: {
-                        process: true,
-                        treatment_methods: {
-                            select: { method: true }
-                        }
-                    }
-                }
-            }
+            select: TREATMENT_SELECT
         });
 
         if (!treatments.length)
@@ -174,7 +148,8 @@ class TreatmentService {
 
         const updatedTreatment = await this.prisma.treatments.update({
             where: { id: treatmentId },
-            data: updateData
+            data: updateData,
+            select: TREATMENT_SELECT
         });
 
         if (!updatedTreatment)

@@ -1,6 +1,7 @@
 import { Picker } from "@react-native-picker/picker";
+import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -26,6 +27,26 @@ function SignupScreen() {
 
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+
+    // Silent location capture — same permission model as the product/requirement
+    // forms' useCurrentLocation, but fired once on mount so it's ready by submit
+    // time without an extra explicit "capture location" tap during onboarding
+    const [latitude, setLatitude] = useState<number | undefined>(undefined);
+    const [longitude, setLongitude] = useState<number | undefined>(undefined);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== 'granted') return;
+                const loc = await Location.getCurrentPositionAsync({});
+                setLatitude(loc.coords.latitude);
+                setLongitude(loc.coords.longitude);
+            } catch (e) {
+                // silent — location is optional, signup must not block on it
+            }
+        })();
+    }, []);
 
     // Step 1 — identity
     const [fname, setFname] = useState('');
@@ -70,7 +91,6 @@ function SignupScreen() {
     const handleNext = () => {
         if (!validateStep()) return;
         if (step < TOTAL_STEPS) { setStep(s => s + 1); return; }
-        
         handlePasswordSubmit();
     };
 
@@ -88,7 +108,8 @@ function SignupScreen() {
         const payload = {
             username, fname, mname, lname,
             companyName, designation, frpIndustryId,
-            address, email, contactNum, password
+            address, email, contactNum, password,
+            latitude, longitude,
         };
 
         const { error } = await signUp(payload);
@@ -112,10 +133,12 @@ function SignupScreen() {
             address,
             email,
             contactNum,
+            latitude,
+            longitude,
         };
 
         const { error } = await signInWithGoogle(payload);
-        
+
         setLoading(false);
         if (error) { Alert.alert('Google Signup Failed', error); return; }
         router.replace('/(tabs)');
@@ -126,7 +149,6 @@ function SignupScreen() {
             <Text style={styles.title}>FRP Recycle</Text>
             <Text style={styles.subtitle}>Create your account</Text>
 
-            {/* Step indicator */}
             <View style={styles.stepRow}>
                 {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
                     <View key={i} style={[styles.stepDot, i + 1 <= step && styles.stepDotActive]} />
@@ -171,7 +193,7 @@ function SignupScreen() {
                     <Text style={styles.stepTitle}>Credentials</Text>
                     <TextInput style={styles.input} placeholder="Email *" placeholderTextColor="#9ba1a6" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
                     <TextInput style={styles.input} placeholder="Contact number" placeholderTextColor="#9ba1a6" value={contactNum} onChangeText={setContactNum} keyboardType="phone-pad" />
-                    
+
                     <View style={styles.dividerContainer}>
                         <View style={styles.dividerLine} />
                         <Text style={styles.dividerText}>Sign Up with Password</Text>
@@ -180,18 +202,14 @@ function SignupScreen() {
 
                     <TextInput style={styles.input} placeholder="Password *" placeholderTextColor="#9ba1a6" value={password} onChangeText={setPassword} secureTextEntry />
                     <TextInput style={styles.input} placeholder="Confirm password *" placeholderTextColor="#9ba1a6" value={confirm} onChangeText={setConfirm} secureTextEntry />
-                    
+
                     <View style={styles.dividerContainer}>
                         <View style={styles.dividerLine} />
                         <Text style={styles.dividerText}>Or Use Google</Text>
                         <View style={styles.dividerLine} />
                     </View>
 
-                    <TouchableOpacity 
-                        style={styles.googleBtn} 
-                        onPress={handleGoogleSignup}
-                        disabled={loading}
-                    >
+                    <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleSignup} disabled={loading}>
                         <Text style={styles.googleBtnText}>Sign up with Google</Text>
                     </TouchableOpacity>
                 </View>
@@ -203,32 +221,20 @@ function SignupScreen() {
                         <Text style={styles.backBtnText}>← Back</Text>
                     </TouchableOpacity>
                 )}
-                
+
                 {!(step === TOTAL_STEPS) && (
                     <TouchableOpacity
                         style={[styles.nextBtn, step === 1 && styles.nextBtnFull]}
                         onPress={handleNext}
                         disabled={loading}
                     >
-                        {loading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.nextBtnText}>Next →</Text>
-                        )}
+                        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.nextBtnText}>Next →</Text>}
                     </TouchableOpacity>
                 )}
 
                 {step === TOTAL_STEPS && (
-                    <TouchableOpacity
-                        style={styles.nextBtn}
-                        onPress={handlePasswordSubmit}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.nextBtnText}>Register with Password</Text>
-                        )}
+                    <TouchableOpacity style={styles.nextBtn} onPress={handlePasswordSubmit} disabled={loading}>
+                        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.nextBtnText}>Register with Password</Text>}
                     </TouchableOpacity>
                 )}
             </View>
@@ -252,11 +258,7 @@ const styles = StyleSheet.create({
     stepContainer: { gap: 12, marginBottom: 24 },
     stepTitle: { fontSize: 18, fontWeight: '600', color: '#11181C', marginBottom: 4 },
     label: { fontSize: 13, color: '#687076', marginTop: 4 },
-    input: {
-        height: 50, borderWidth: 1, borderColor: '#e0e0e0',
-        borderRadius: 10, paddingHorizontal: 16, fontSize: 16,
-        color: '#11181C', backgroundColor: '#f9f9f9',
-    },
+    input: { height: 50, borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 10, paddingHorizontal: 16, fontSize: 16, color: '#11181C', backgroundColor: '#f9f9f9' },
     pickerWrap: { borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 10, overflow: 'hidden', backgroundColor: '#f9f9f9' },
     navRow: { flexDirection: 'row', gap: 12 },
     backBtn: { flex: 1, height: 50, borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
@@ -270,18 +272,8 @@ const styles = StyleSheet.create({
     dividerContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
     dividerLine: { flex: 1, height: 1, backgroundColor: '#e0e0e0' },
     dividerText: { fontSize: 12, color: '#9ba1a6', marginHorizontal: 10 },
-    googleBtn: {
-        height: 50,
-        backgroundColor: '#4285F4',
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    googleBtnText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    }
+    googleBtn: { height: 50, backgroundColor: '#4285F4', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+    googleBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
 
 export default SignupScreen;

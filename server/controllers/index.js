@@ -63,9 +63,11 @@ import {
 
 
 import {
+    forgotPassword,
     getUserById,
     loginUser,
     loginWithGoogle,
+    resetPassword,
     searchUsers,
     signupWithEmail,
     signupWithGoogle
@@ -119,12 +121,10 @@ export {
     deleteCollectorConsumer,
     deleteCollectorSource, deleteManufacturingProcess, deleteProduct, deleteRecycleProcess, deleteRequirement, deleteTreatment,
     deleteTreatmentProcess,
-    deleteWaste,
-    getAllCollectors,
+    deleteWaste, forgotPassword, getAllCollectors,
     getAllProducts, getAllRecycleProcesses, getAllRecyclers, getAllRequirements, getAllTreatmentMethods, getAllTreatmentProcesses,
     getAllTreatments,
-    getAllWasteEntries,
-    getCollectorById,
+    getAllWasteEntries, getCollectorById,
     getCollectorsByProximity,
     getConsumersByCollector, getFilteredManufacturingProcesses, getFilteredProducts, getFilteredRecycleProcesses, getFilteredRecyclers, getFilteredRequirements, getFilteredTreatments,
     getFilteredWaste, getFrp, getManufacturingProcessById,
@@ -140,7 +140,7 @@ export {
     loginUser,
     loginWithGoogle,
     registerCollector,
-    registerRecycler, searchUsers, signupWithEmail,
+    registerRecycler, resetPassword, searchUsers, signupWithEmail,
     signupWithGoogle,
     updateCollector, updateManufacturingProcess, updateProduct, updateRecycleProcess, updateRequirement, updateTreatment,
     updateTreatmentProcess,

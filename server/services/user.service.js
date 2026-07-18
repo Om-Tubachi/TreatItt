@@ -8,7 +8,6 @@ class UserService {
     }
 
     async create(data, isOAuth) {
-
         if (isOAuth) {
             return this.prisma.users.create({
                 data: { ...data }
@@ -17,13 +16,6 @@ class UserService {
         const hashed = await bcrypt.hash(data.password, 10);
         return this.prisma.users.create({
             data: { ...data, password: hashed }
-        });
-    }
-
-    async getUserById(userId) {
-        return this.prisma.users.findUnique({
-            where: { id: userId },
-            omit: { password: true, refresh_token: true }
         });
     }
 
@@ -49,20 +41,35 @@ class UserService {
     }
 
     async updatePassword(userId, newPassword) {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-
+        const user = await this.prisma.users.findUnique({ where: { id: userId } });
         const isSamePassword = await bcrypt.compare(newPassword, user.password);
-        if (isSamePassword) return; // equivalent of isModified check
-
+        if (isSamePassword) return;
         const hashed = await bcrypt.hash(newPassword, 10);
-        return prisma.users.update({
+        return this.prisma.users.update({
             where: { id: userId },
             data: { password: hashed }
         });
     }
 
-    // §1.5 — username search, entirely new. Deliberately omits any `collectors`
-    // relation per the master doc's out-of-scope rule.
+    // "raw" forgot-password flow — no token, no email delivery. Just checks presence.
+    async checkEmailExists(email) {
+        if (!email || !email.trim()) return false;
+        const user = await this.prisma.users.findUnique({ where: { email: email.trim() } });
+        return !!user;
+    }
+
+    // called only after checkEmailExists has already gated the client UI —
+    // still re-validates existence server-side rather than trusting the client
+    async resetPasswordByEmail(email, newPassword) {
+        const user = await this.prisma.users.findUnique({ where: { email: email.trim() } });
+        if (!user) return null;
+        const hashed = await bcrypt.hash(newPassword, 10);
+        return this.prisma.users.update({
+            where: { id: user.id },
+            data: { password: hashed }
+        });
+    }
+
     async searchByUsername(query, limit = 20) {
         if (!query || !query.trim()) return [];
         return this.prisma.users.findMany({
@@ -75,6 +82,13 @@ class UserService {
                 manufacturing_processes: { select: { id: true }, take: 1 },
                 frp_requirements: { select: { id: true }, take: 1 },
             }
+        });
+    }
+
+    async getUserById(userId) {
+        return this.prisma.users.findUnique({
+            where: { id: userId },
+            omit: { password: true, refresh_token: true }
         });
     }
 }
